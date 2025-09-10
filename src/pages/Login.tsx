@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 
@@ -79,6 +80,7 @@ const Login: React.FC = () => {
       <GoogleButton onClick={signInWithGoogle}>
         Sign in with Google
       </GoogleButton>
+      <Link to="/register">Register an account</Link>
     </Container>
   );
 };

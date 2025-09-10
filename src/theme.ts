@@ -1,4 +1,17 @@
 import { css } from "styled-components";
+import type { DefaultTheme as DT, RuleSet } from "styled-components";
+
+declare module "styled-components" {
+  export interface DefaultTheme extends DT {
+    colors: {
+      primary: string;
+      background: string;
+      text: string;
+      accent: string;
+    };
+    glassmorphism: RuleSet<object>;
+  }
+}
 
 export const glassmorphism = css`
   background: rgba(255, 255, 255, 0.1);

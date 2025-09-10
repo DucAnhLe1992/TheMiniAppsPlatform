@@ -14,12 +14,13 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import styled, { ThemeProvider } from "styled-components";
 import { theme } from "../theme";
+import type { Session } from "@supabase/supabase-js";
 
 const AppWrapper = styled.div`
   display: flex;
   height: 100vh;
-  background: ${(props) => props.theme.colors.background};
-  color: ${(props) => props.theme.colors.text};
+  background: ${(props) => props.theme?.colors.background};
+  color: ${(props) => props.theme?.colors.text};
 `;
 
 const MainContent = styled.main`
@@ -29,11 +30,23 @@ const MainContent = styled.main`
 `;
 
 const AppShell: React.FC = () => {
-  const [session, setSession] = useState(
-    supabase.auth.getSession()?.data.session ?? null,
+  const [session, setSession] = useState<Session | null>(
+    // supabase.auth.getSession()?.data?.session ?? null,
+    null,
   );
 
+  const initAuth = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    const session = data.session;
+
+    if (session && !error) {
+      setSession(session);
+    }
+  };
+
   useEffect(() => {
+    initAuth();
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
