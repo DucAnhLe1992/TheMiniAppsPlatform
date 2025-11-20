@@ -22,7 +22,6 @@
     }
   },
   "references": [
-    { "path": "./apps/shell/tsconfig.json" },
     { "path": "./tsconfig.node.json" }
   ]
 }

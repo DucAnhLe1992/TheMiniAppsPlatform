@@ -349,36 +349,69 @@ const getWeatherIcon = (description: string): string => {
   return '🌤️';
 };
 
-const generateMockWeather = (lat: number, lon: number): WeatherData => {
-  const conditions = ['Clear sky', 'Few clouds', 'Scattered clouds', 'Partly cloudy', 'Overcast'];
-  const baseTemp = 15 + (Math.abs(lat) < 30 ? 10 : -5) + Math.random() * 10;
-  const condition = conditions[Math.floor(Math.random() * conditions.length)];
+const fetchWeatherData = async (lat: number, lon: number): Promise<WeatherData | null> => {
+  try {
+    const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-weather?lat=${lat}&lon=${lon}&type=current`;
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+    });
 
-  return {
-    temp: Math.round(baseTemp),
-    feels_like: Math.round(baseTemp + (Math.random() * 4 - 2)),
-    humidity: Math.round(40 + Math.random() * 40),
-    wind_speed: Math.round(Math.random() * 15),
-    description: condition,
-    icon: getWeatherIcon(condition),
-  };
+    if (!response.ok) throw new Error('Failed to fetch weather');
+
+    const data = await response.json();
+
+    return {
+      temp: Math.round(data.main.temp),
+      feels_like: Math.round(data.main.feels_like),
+      humidity: data.main.humidity,
+      wind_speed: Math.round(data.wind.speed * 3.6),
+      description: data.weather[0].description,
+      icon: getWeatherIcon(data.weather[0].description),
+    };
+  } catch (error) {
+    console.error('Error fetching weather:', error);
+    return null;
+  }
 };
 
-const generateMockForecast = (): ForecastDay[] => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-  const conditions = ['Clear', 'Cloudy', 'Rainy', 'Partly cloudy', 'Sunny'];
+const fetchForecastData = async (lat: number, lon: number): Promise<ForecastDay[]> => {
+  try {
+    const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-weather?lat=${lat}&lon=${lon}&type=forecast`;
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+    });
 
-  return days.map((day, i) => {
-    const condition = conditions[Math.floor(Math.random() * conditions.length)];
-    const baseTemp = 15 + Math.random() * 10;
-    return {
-      date: day,
-      temp_max: Math.round(baseTemp + 5),
-      temp_min: Math.round(baseTemp - 3),
-      description: condition,
-      icon: getWeatherIcon(condition),
-    };
-  });
+    if (!response.ok) throw new Error('Failed to fetch forecast');
+
+    const data = await response.json();
+
+    const dailyData: { [key: string]: any[] } = {};
+    data.list.forEach((item: any) => {
+      const date = new Date(item.dt * 1000);
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+      if (!dailyData[dayName]) dailyData[dayName] = [];
+      dailyData[dayName].push(item);
+    });
+
+    return Object.entries(dailyData).slice(0, 5).map(([day, items]) => {
+      const temps = items.map((item: any) => item.main.temp);
+      const descriptions = items.map((item: any) => item.weather[0].description);
+      return {
+        date: day,
+        temp_max: Math.round(Math.max(...temps)),
+        temp_min: Math.round(Math.min(...temps)),
+        description: descriptions[0],
+        icon: getWeatherIcon(descriptions[0]),
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching forecast:', error);
+    return [];
+  }
 };
 
 const WeatherInfo: React.FC = () => {
@@ -433,11 +466,11 @@ const WeatherInfo: React.FC = () => {
   };
 
   const fetchWeather = async (location: Location) => {
-    const mockWeather = generateMockWeather(location.latitude, location.longitude);
-    setWeather(mockWeather);
+    const weatherData = await fetchWeatherData(location.latitude, location.longitude);
+    if (weatherData) setWeather(weatherData);
 
-    const mockForecast = generateMockForecast();
-    setForecast(mockForecast);
+    const forecastData = await fetchForecastData(location.latitude, location.longitude);
+    setForecast(forecastData);
   };
 
   const handleAddLocation = async (e: React.FormEvent) => {

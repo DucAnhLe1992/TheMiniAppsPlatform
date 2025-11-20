@@ -39,6 +39,21 @@ const CURRENCIES = [
   { code: 'CNY', name: 'Chinese Yuan', symbol: '¥' },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
   { code: 'MXN', name: 'Mexican Peso', symbol: 'MX$' },
+  { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$' },
+  { code: 'SEK', name: 'Swedish Krona', symbol: 'kr' },
+  { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr' },
+  { code: 'DKK', name: 'Danish Krone', symbol: 'kr' },
+  { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' },
+  { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$' },
+  { code: 'KRW', name: 'South Korean Won', symbol: '₩' },
+  { code: 'BRL', name: 'Brazilian Real', symbol: 'R$' },
+  { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
+  { code: 'RUB', name: 'Russian Ruble', symbol: '₽' },
+  { code: 'TRY', name: 'Turkish Lira', symbol: '₺' },
+  { code: 'THB', name: 'Thai Baht', symbol: '฿' },
+  { code: 'PLN', name: 'Polish Zloty', symbol: 'zł' },
+  { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ' },
+  { code: 'SAR', name: 'Saudi Riyal', symbol: 'SR' },
 ];
 
 const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Other'];
@@ -170,20 +185,30 @@ const Select = styled.select`
   }
 `;
 
-const SwapButton = styled.button`
+const SwapButton = styled(motion.button)`
   align-self: center;
-  padding: 0.75rem;
-  background: ${props => props.theme.colors.surface};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 8px;
-  color: ${props => props.theme.colors.text};
+  width: 48px;
+  height: 48px;
+  background: ${props => props.theme.colors.primary};
+  border: none;
+  border-radius: 50%;
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
-    transform: rotate(180deg);
+    background: ${props => props.theme.colors.primaryHover};
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -517,19 +542,49 @@ const CurrencyConverter: React.FC = () => {
   };
 
   const fetchExchangeRates = async () => {
-    const rates: ExchangeRates = {
-      USD: 1,
-      EUR: 0.92,
-      GBP: 0.79,
-      JPY: 149.50,
-      CAD: 1.36,
-      AUD: 1.53,
-      CHF: 0.88,
-      CNY: 7.24,
-      INR: 83.12,
-      MXN: 17.05,
-    };
-    setExchangeRates(rates);
+    try {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-exchange-rates?base=USD`;
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch exchange rates');
+
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+      const fallbackRates: ExchangeRates = {
+        USD: 1,
+        EUR: 0.92,
+        GBP: 0.79,
+        JPY: 149.50,
+        CAD: 1.36,
+        AUD: 1.53,
+        CHF: 0.88,
+        CNY: 7.24,
+        INR: 83.12,
+        MXN: 17.05,
+        NZD: 1.62,
+        SEK: 10.55,
+        NOK: 10.85,
+        DKK: 6.87,
+        SGD: 1.34,
+        HKD: 7.83,
+        KRW: 1308.50,
+        BRL: 4.97,
+        ZAR: 18.65,
+        RUB: 92.50,
+        TRY: 32.15,
+        THB: 35.20,
+        PLN: 3.98,
+        AED: 3.67,
+        SAR: 3.75,
+      };
+      setExchangeRates(fallbackRates);
+    }
   };
 
   const fetchBudgets = async () => {
@@ -721,7 +776,12 @@ const CurrencyConverter: React.FC = () => {
               </InputGroup>
             </ConversionBox>
 
-            <SwapButton theme={theme} onClick={handleSwapCurrencies}>
+            <SwapButton
+              theme={theme}
+              onClick={handleSwapCurrencies}
+              whileTap={{ rotate: 180 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            >
               ⇄
             </SwapButton>
 
