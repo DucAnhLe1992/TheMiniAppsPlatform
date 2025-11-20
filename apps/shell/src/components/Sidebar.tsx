@@ -255,6 +255,10 @@ const Sidebar: React.FC = () => {
 
           <NavSection>
             <SectionLabel theme={theme}>Tools</SectionLabel>
+            <NavItem theme={theme} to="/apps/todo-list" onClick={() => setIsOpen(false)}>
+              <NavIcon>✅</NavIcon>
+              To-Do List
+            </NavItem>
             <NavItem theme={theme} to="/apps/text-summarizer" onClick={() => setIsOpen(false)}>
               <NavIcon>📝</NavIcon>
               Text Summarizer
