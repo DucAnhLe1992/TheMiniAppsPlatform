@@ -283,6 +283,10 @@ const Sidebar: React.FC = () => {
               <NavIcon>📅</NavIcon>
               Calendar
             </NavItem>
+            <NavItem theme={theme} to="/apps/habit-tracker" onClick={() => setIsOpen(false)}>
+              <NavIcon>🎯</NavIcon>
+              Habit Tracker
+            </NavItem>
           </NavSection>
         </NavItems>
 
