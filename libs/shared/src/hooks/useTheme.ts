@@ -1,29 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { lightTheme, darkTheme } from '../theme';
+import { useThemeContext } from '../contexts/ThemeContext';
 
-export type ThemeMode = 'light' | 'dark';
-
+// Public hook used throughout the app; now delegates to the global ThemeContext.
 export function useTheme() {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    const stored = localStorage.getItem('theme');
-    return (stored as ThemeMode) || 'dark';
-  });
-
-  const theme = useMemo(() => {
-    return themeMode === 'light' ? lightTheme : darkTheme;
-  }, [themeMode]);
-
-  const toggleTheme = () => {
-    setThemeMode((prev) => {
-      const newMode = prev === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', newMode);
-      return newMode;
-    });
-  };
-
-  useEffect(() => {
-    localStorage.setItem('theme', themeMode);
-  }, [themeMode]);
-
-  return { theme, themeMode, toggleTheme };
+  return useThemeContext();
 }

@@ -24,6 +24,7 @@ const SidebarContainer = styled(motion.nav)<{ $isOpen: boolean }>`
     transform: translateX(${props => props.$isOpen ? '0' : '-100%'});
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: ${props => props.$isOpen ? props.theme.shadows.xl : 'none'};
+    pointer-events: ${props => props.$isOpen ? 'auto' : 'none'};
   }
 `;
 
