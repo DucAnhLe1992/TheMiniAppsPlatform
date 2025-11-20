@@ -1,30 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 export default defineConfig({
   plugins: [react()],
-  root: path.resolve(__dirname),
-  envDir: path.resolve(__dirname, '../../'),
-  publicDir: path.resolve(__dirname, 'public'),
+  root: 'apps/shell',
+  envDir: '../../',
+  publicDir: 'public',
   build: {
-    outDir: path.resolve(__dirname, '../../dist/apps/shell'),
-    emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html')
-      }
-    }
+    outDir: '../../dist/apps/shell',
+    emptyOutDir: true
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@shared': path.resolve(__dirname, '../../libs/shared/src')
+      '@': path.resolve(process.cwd(), 'apps/shell/src'),
+      '@shared': path.resolve(process.cwd(), 'libs/shared/src')
     }
   },
   server: {
