@@ -19,9 +19,9 @@
     "paths": {
       "@shared": ["libs/shared/src/index.ts"],
       "@shared/*": ["libs/shared/src/*"]
-    }
+    },
+    "types": ["vite/client"]
   },
-  "references": [
-    { "path": "./tsconfig.node.json" }
-  ]
+  "references": [],
+  "include": ["src", "src/vite-env.d.ts"]
 }
