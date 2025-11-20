@@ -8,11 +8,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   plugins: [react()],
   root: __dirname,
+  base: '/',
   envDir: path.join(__dirname, '../../'),
   publicDir: path.join(__dirname, 'public'),
   build: {
     outDir: path.join(__dirname, '../../dist/apps/shell'),
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      input: path.join(__dirname, 'index.html')
+    }
   },
   resolve: {
     alias: {
