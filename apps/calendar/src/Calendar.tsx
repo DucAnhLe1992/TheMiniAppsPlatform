@@ -1,316 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 import { supabase, useTheme } from '@shared';
-import { motion, AnimatePresence } from 'framer-motion';
-
-interface Event {
-  id: string;
-  title: string;
-  description: string | null;
-  start_time: string;
-  end_time: string;
-  location: string | null;
-  event_type: string;
-  color: string;
-  is_all_day: boolean;
-}
-
-const Container = styled.div`
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 0 4rem 0;
-`;
-
-const Header = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 0.5rem;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.125rem;
-  color: ${props => props.theme.colors.textSecondary};
-  margin: 0;
-`;
-
-const Controls = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-`;
-
-const NavButtons = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-`;
-
-const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: ${props => props.$variant === 'primary' ? props.theme.colors.primary : props.theme.colors.surface};
-  color: ${props => props.$variant === 'primary' ? '#ffffff' : props.theme.colors.text};
-  border: ${props => props.$variant === 'secondary' ? `1px solid ${props.theme.colors.border}` : 'none'};
-
-  &:hover {
-    background: ${props => props.$variant === 'primary' ? props.theme.colors.primaryHover : props.theme.colors.surfaceHover};
-  }
-`;
-
-const MonthTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: ${props => props.theme.colors.text};
-  margin: 0;
-`;
-
-const CalendarGrid = styled.div`
-  background: ${props => props.theme.colors.surface};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 12px;
-  overflow: hidden;
-`;
-
-const WeekdayHeader = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  background: ${props => props.theme.colors.background};
-  border-bottom: 2px solid ${props => props.theme.colors.border};
-`;
-
-const WeekdayCell = styled.div`
-  padding: 1rem;
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: ${props => props.theme.colors.textSecondary};
-  text-transform: uppercase;
-
-  @media (max-width: 768px) {
-    padding: 0.5rem;
-    font-size: 0.75rem;
-  }
-`;
-
-const DaysGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: 120px;
-
-  @media (max-width: 768px) {
-    grid-auto-rows: 80px;
-  }
-`;
-
-const DayCell = styled.div<{ $isToday: boolean; $isOtherMonth: boolean }>`
-  padding: 0.5rem;
-  border: 1px solid ${props => props.theme.colors.border};
-  cursor: pointer;
-  transition: background 0.2s ease;
-  background: ${props => props.$isOtherMonth ? props.theme.colors.background : 'transparent'};
-  position: relative;
-
-  &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
-  }
-
-  ${props => props.$isToday && `
-    background: ${props.theme.colors.primaryLight};
-    font-weight: 700;
-  `}
-`;
-
-const DayNumber = styled.div<{ $isToday: boolean }>`
-  font-size: 0.875rem;
-  font-weight: ${props => props.$isToday ? '700' : '600'};
-  color: ${props => props.$isToday ? props.theme.colors.primary : props.theme.colors.text};
-  margin-bottom: 0.25rem;
-
-  @media (max-width: 768px) {
-    font-size: 0.75rem;
-  }
-`;
-
-const EventBadge = styled.div<{ $color: string }>`
-  background: ${props => props.$color};
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 0.625rem;
-    padding: 0.125rem 0.25rem;
-  }
-`;
-
-const Modal = styled(motion.div)`
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-`;
-
-const ModalContent = styled(motion.div)`
-  background: ${props => props.theme.colors.surface};
-  border-radius: 16px;
-  padding: 2rem;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-`;
-
-const ModalHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-`;
-
-const ModalTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: ${props => props.theme.colors.text};
-  margin: 0;
-`;
-
-const CloseButton = styled.button`
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: ${props => props.theme.colors.textSecondary};
-  cursor: pointer;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-
-  &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
-  }
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const FormGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const Label = styled.label`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${props => props.theme.colors.text};
-`;
-
-const Input = styled.input`
-  padding: 0.75rem;
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 8px;
-  background: ${props => props.theme.colors.background};
-  color: ${props => props.theme.colors.text};
-  font-size: 1rem;
-
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-  }
-`;
-
-const TextArea = styled.textarea`
-  padding: 0.75rem;
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 8px;
-  background: ${props => props.theme.colors.background};
-  color: ${props => props.theme.colors.text};
-  font-size: 1rem;
-  min-height: 100px;
-  resize: vertical;
-
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-  }
-`;
-
-const Select = styled.select`
-  padding: 0.75rem;
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 8px;
-  background: ${props => props.theme.colors.background};
-  color: ${props => props.theme.colors.text};
-  font-size: 1rem;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-  }
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  margin-top: 0.5rem;
-`;
-
-const EventColors = [
-  { name: 'Blue', value: '#3b82f6' },
-  { name: 'Green', value: '#10b981' },
-  { name: 'Red', value: '#ef4444' },
-  { name: 'Yellow', value: '#f59e0b' },
-  { name: 'Purple', value: '#8b5cf6' },
-  { name: 'Pink', value: '#ec4899' },
-];
+import { AnimatePresence } from 'framer-motion';
+import { Event, ViewMode, EventColors, RecurrenceOptions, ReminderOptions, Participant } from './types';
+import * as S from './styles';
+import MonthView from './views/MonthView';
+import WeekView from './views/WeekView';
+import DayView from './views/DayView';
+import AgendaView from './views/AgendaView';
+import EventModal from './components/EventModal';
 
 const Calendar: React.FC = () => {
   const { theme } = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
 
   const [eventTitle, setEventTitle] = useState('');
   const [eventDescription, setEventDescription] = useState('');
@@ -320,6 +30,10 @@ const Calendar: React.FC = () => {
   const [eventType, setEventType] = useState('meeting');
   const [eventColor, setEventColor] = useState('#3b82f6');
   const [isAllDay, setIsAllDay] = useState(false);
+  const [recurrenceRule, setRecurrenceRule] = useState('');
+  const [reminderMinutes, setReminderMinutes] = useState(15);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [newParticipantEmail, setNewParticipantEmail] = useState('');
 
   useEffect(() => {
     initUser();
@@ -329,7 +43,11 @@ const Calendar: React.FC = () => {
     if (userId) {
       fetchEvents();
     }
-  }, [userId, currentDate]);
+  }, [userId, currentDate, viewMode]);
+
+  useEffect(() => {
+    filterEvents();
+  }, [events, searchQuery, filterType]);
 
   const initUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -339,15 +57,38 @@ const Calendar: React.FC = () => {
   const fetchEvents = async () => {
     if (!userId) return;
 
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
+    let startDate: Date;
+    let endDate: Date;
+
+    if (viewMode === 'month') {
+      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
+    } else if (viewMode === 'week') {
+      const day = currentDate.getDay();
+      startDate = new Date(currentDate);
+      startDate.setDate(currentDate.getDate() - day);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+      endDate.setHours(23, 59, 59, 999);
+    } else if (viewMode === 'day') {
+      startDate = new Date(currentDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(currentDate);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 3);
+    }
 
     try {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .gte('start_time', startOfMonth.toISOString())
-        .lte('start_time', endOfMonth.toISOString())
+        .gte('start_time', startDate.toISOString())
+        .lte('start_time', endDate.toISOString())
         .order('start_time', { ascending: true });
 
       if (error) throw error;
@@ -357,59 +98,51 @@ const Calendar: React.FC = () => {
     }
   };
 
-  const getDaysInMonth = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+  const filterEvents = () => {
+    let filtered = events;
 
-    const days: Date[] = [];
-
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      const prevMonthDay = new Date(year, month, -startingDayOfWeek + i + 1);
-      days.push(prevMonthDay);
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(event =>
+        event.title.toLowerCase().includes(query) ||
+        (event.description && event.description.toLowerCase().includes(query)) ||
+        (event.location && event.location.toLowerCase().includes(query))
+      );
     }
 
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(new Date(year, month, i));
+    if (filterType !== 'all') {
+      filtered = filtered.filter(event => event.event_type === filterType);
     }
 
-    const remainingDays = 42 - days.length;
-    for (let i = 1; i <= remainingDays; i++) {
-      days.push(new Date(year, month + 1, i));
+    setFilteredEvents(filtered);
+  };
+
+  const handlePrevPeriod = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    } else if (viewMode === 'week') {
+      const newDate = new Date(currentDate);
+      newDate.setDate(currentDate.getDate() - 7);
+      setCurrentDate(newDate);
+    } else if (viewMode === 'day') {
+      const newDate = new Date(currentDate);
+      newDate.setDate(currentDate.getDate() - 1);
+      setCurrentDate(newDate);
     }
-
-    return days;
   };
 
-  const getEventsForDay = (date: Date) => {
-    return events.filter(event => {
-      const eventDate = new Date(event.start_time);
-      return eventDate.getDate() === date.getDate() &&
-             eventDate.getMonth() === date.getMonth() &&
-             eventDate.getFullYear() === date.getFullYear();
-    });
-  };
-
-  const isToday = (date: Date) => {
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
-  };
-
-  const isOtherMonth = (date: Date) => {
-    return date.getMonth() !== currentDate.getMonth();
-  };
-
-  const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  const handleNextPeriod = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    } else if (viewMode === 'week') {
+      const newDate = new Date(currentDate);
+      newDate.setDate(currentDate.getDate() + 7);
+      setCurrentDate(newDate);
+    } else if (viewMode === 'day') {
+      const newDate = new Date(currentDate);
+      newDate.setDate(currentDate.getDate() + 1);
+      setCurrentDate(newDate);
+    }
   };
 
   const handleToday = () => {
@@ -419,12 +152,7 @@ const Calendar: React.FC = () => {
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
     setSelectedEvent(null);
-    setEventTitle('');
-    setEventDescription('');
-    setEventLocation('');
-    setEventType('meeting');
-    setEventColor('#3b82f6');
-    setIsAllDay(false);
+    resetForm();
 
     const dateStr = date.toISOString().split('T')[0];
     setEventStartTime(`${dateStr}T09:00`);
@@ -433,8 +161,7 @@ const Calendar: React.FC = () => {
     setShowEventModal(true);
   };
 
-  const handleEventClick = (event: Event, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleEventClick = async (event: Event) => {
     setSelectedEvent(event);
     setEventTitle(event.title);
     setEventDescription(event.description || '');
@@ -442,13 +169,62 @@ const Calendar: React.FC = () => {
     setEventType(event.event_type);
     setEventColor(event.color);
     setIsAllDay(event.is_all_day);
+    setRecurrenceRule(event.recurrence_rule || '');
+    setReminderMinutes(event.reminder_minutes || 15);
 
     const startTime = new Date(event.start_time).toISOString().slice(0, 16);
     const endTime = new Date(event.end_time).toISOString().slice(0, 16);
     setEventStartTime(startTime);
     setEventEndTime(endTime);
 
+    await fetchParticipants(event.id);
     setShowEventModal(true);
+  };
+
+  const fetchParticipants = async (eventId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('event_participants')
+        .select('*')
+        .eq('event_id', eventId);
+
+      if (error) throw error;
+      setParticipants(data || []);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+    }
+  };
+
+  const handleAddParticipant = () => {
+    if (!newParticipantEmail.trim()) return;
+
+    const newParticipant: Participant = {
+      id: `temp-${Date.now()}`,
+      event_id: selectedEvent?.id || '',
+      email: newParticipantEmail,
+      name: null,
+      status: 'pending',
+    };
+
+    setParticipants([...participants, newParticipant]);
+    setNewParticipantEmail('');
+  };
+
+  const handleRemoveParticipant = (index: number) => {
+    setParticipants(participants.filter((_, i) => i !== index));
+  };
+
+  const resetForm = () => {
+    setEventTitle('');
+    setEventDescription('');
+    setEventLocation('');
+    setEventType('meeting');
+    setEventColor('#3b82f6');
+    setIsAllDay(false);
+    setRecurrenceRule('');
+    setReminderMinutes(15);
+    setParticipants([]);
+    setNewParticipantEmail('');
   };
 
   const handleSaveEvent = async (e: React.FormEvent) => {
@@ -465,24 +241,52 @@ const Calendar: React.FC = () => {
       event_type: eventType,
       color: eventColor,
       is_all_day: isAllDay,
+      recurrence_rule: recurrenceRule || null,
+      reminder_minutes: reminderMinutes,
     };
 
     try {
+      let eventId: string;
+
       if (selectedEvent) {
         const { error } = await supabase
           .from('events')
           .update(eventData)
           .eq('id', selectedEvent.id);
         if (error) throw error;
+        eventId = selectedEvent.id;
+
+        await supabase
+          .from('event_participants')
+          .delete()
+          .eq('event_id', eventId);
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('events')
-          .insert(eventData);
+          .insert(eventData)
+          .select()
+          .single();
+        if (error) throw error;
+        eventId = data.id;
+      }
+
+      if (participants.length > 0) {
+        const participantData = participants.map(p => ({
+          event_id: eventId,
+          email: p.email,
+          name: p.name,
+          status: p.status,
+        }));
+
+        const { error } = await supabase
+          .from('event_participants')
+          .insert(participantData);
         if (error) throw error;
       }
 
       await fetchEvents();
       setShowEventModal(false);
+      resetForm();
     } catch (error) {
       console.error('Error saving event:', error);
     }
@@ -501,205 +305,161 @@ const Calendar: React.FC = () => {
 
       await fetchEvents();
       setShowEventModal(false);
+      resetForm();
     } catch (error) {
       console.error('Error deleting event:', error);
     }
   };
 
-  const monthName = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const days = getDaysInMonth();
+  const getPeriodTitle = () => {
+    if (viewMode === 'month') {
+      return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (viewMode === 'week') {
+      const start = new Date(currentDate);
+      start.setDate(currentDate.getDate() - currentDate.getDay());
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    } else if (viewMode === 'day') {
+      return currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    } else {
+      return 'Upcoming Events';
+    }
+  };
 
   return (
-    <Container>
-      <Header>
-        <Title theme={theme}>Calendar</Title>
-        <Subtitle theme={theme}>Manage your schedule and events</Subtitle>
-      </Header>
+    <S.Container>
+      <S.Header>
+        <S.Title theme={theme}>Calendar</S.Title>
+        <S.Subtitle theme={theme}>Manage your schedule and events</S.Subtitle>
+      </S.Header>
 
-      <Controls>
-        <NavButtons>
-          <Button theme={theme} $variant="secondary" onClick={handlePrevMonth}>
-            ←
-          </Button>
-          <MonthTitle theme={theme}>{monthName}</MonthTitle>
-          <Button theme={theme} $variant="secondary" onClick={handleNextMonth}>
-            →
-          </Button>
-        </NavButtons>
-        <Button theme={theme} $variant="primary" onClick={handleToday}>
-          Today
-        </Button>
-      </Controls>
+      <S.Controls>
+        <S.NavButtons>
+          {viewMode !== 'agenda' && (
+            <>
+              <S.Button theme={theme} $variant="secondary" onClick={handlePrevPeriod}>
+                ←
+              </S.Button>
+              <S.MonthTitle theme={theme}>{getPeriodTitle()}</S.MonthTitle>
+              <S.Button theme={theme} $variant="secondary" onClick={handleNextPeriod}>
+                →
+              </S.Button>
+              <S.Button theme={theme} $variant="secondary" onClick={handleToday}>
+                Today
+              </S.Button>
+            </>
+          )}
+        </S.NavButtons>
 
-      <CalendarGrid theme={theme}>
-        <WeekdayHeader theme={theme}>
-          {weekdays.map(day => (
-            <WeekdayCell key={day} theme={theme}>{day}</WeekdayCell>
-          ))}
-        </WeekdayHeader>
-        <DaysGrid>
-          {days.map((day, index) => {
-            const dayEvents = getEventsForDay(day);
-            return (
-              <DayCell
-                key={index}
-                theme={theme}
-                $isToday={isToday(day)}
-                $isOtherMonth={isOtherMonth(day)}
-                onClick={() => !isOtherMonth(day) && handleDayClick(day)}
-              >
-                <DayNumber theme={theme} $isToday={isToday(day)}>
-                  {day.getDate()}
-                </DayNumber>
-                {dayEvents.slice(0, 2).map(event => (
-                  <EventBadge
-                    key={event.id}
-                    $color={event.color}
-                    onClick={(e) => handleEventClick(event, e)}
-                  >
-                    {event.title}
-                  </EventBadge>
-                ))}
-                {dayEvents.length > 2 && (
-                  <EventBadge $color="#6b7280">
-                    +{dayEvents.length - 2} more
-                  </EventBadge>
-                )}
-              </DayCell>
-            );
-          })}
-        </DaysGrid>
-      </CalendarGrid>
+        <S.ViewTabs theme={theme}>
+          <S.ViewTab theme={theme} $active={viewMode === 'month'} onClick={() => setViewMode('month')}>
+            Month
+          </S.ViewTab>
+          <S.ViewTab theme={theme} $active={viewMode === 'week'} onClick={() => setViewMode('week')}>
+            Week
+          </S.ViewTab>
+          <S.ViewTab theme={theme} $active={viewMode === 'day'} onClick={() => setViewMode('day')}>
+            Day
+          </S.ViewTab>
+          <S.ViewTab theme={theme} $active={viewMode === 'agenda'} onClick={() => setViewMode('agenda')}>
+            Agenda
+          </S.ViewTab>
+        </S.ViewTabs>
+      </S.Controls>
+
+      <S.FilterBar>
+        <S.SearchBar
+          theme={theme}
+          type="text"
+          placeholder="Search events..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <S.FilterLabel theme={theme}>Filter:</S.FilterLabel>
+        <S.Select theme={theme} value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+          <option value="all">All Events</option>
+          <option value="meeting">Meetings</option>
+          <option value="task">Tasks</option>
+          <option value="reminder">Reminders</option>
+          <option value="other">Other</option>
+        </S.Select>
+      </S.FilterBar>
+
+      {viewMode === 'month' && (
+        <MonthView
+          currentDate={currentDate}
+          events={filteredEvents}
+          onDayClick={handleDayClick}
+          onEventClick={handleEventClick}
+        />
+      )}
+
+      {viewMode === 'week' && (
+        <WeekView
+          currentDate={currentDate}
+          events={filteredEvents}
+          onTimeSlotClick={handleDayClick}
+          onEventClick={handleEventClick}
+        />
+      )}
+
+      {viewMode === 'day' && (
+        <DayView
+          currentDate={currentDate}
+          events={filteredEvents}
+          onTimeSlotClick={handleDayClick}
+          onEventClick={handleEventClick}
+        />
+      )}
+
+      {viewMode === 'agenda' && (
+        <AgendaView
+          events={filteredEvents}
+          onEventClick={handleEventClick}
+        />
+      )}
 
       <AnimatePresence>
         {showEventModal && (
-          <Modal
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowEventModal(false)}
-          >
-            <ModalContent
-              theme={theme}
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ModalHeader>
-                <ModalTitle theme={theme}>
-                  {selectedEvent ? 'Edit Event' : 'New Event'}
-                </ModalTitle>
-                <CloseButton theme={theme} onClick={() => setShowEventModal(false)}>
-                  ✕
-                </CloseButton>
-              </ModalHeader>
-
-              <Form onSubmit={handleSaveEvent}>
-                <FormGroup>
-                  <Label theme={theme}>Title *</Label>
-                  <Input
-                    theme={theme}
-                    type="text"
-                    value={eventTitle}
-                    onChange={(e) => setEventTitle(e.target.value)}
-                    placeholder="Event title"
-                    required
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>Description</Label>
-                  <TextArea
-                    theme={theme}
-                    value={eventDescription}
-                    onChange={(e) => setEventDescription(e.target.value)}
-                    placeholder="Event description"
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>Start Time *</Label>
-                  <Input
-                    theme={theme}
-                    type="datetime-local"
-                    value={eventStartTime}
-                    onChange={(e) => setEventStartTime(e.target.value)}
-                    required
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>End Time *</Label>
-                  <Input
-                    theme={theme}
-                    type="datetime-local"
-                    value={eventEndTime}
-                    onChange={(e) => setEventEndTime(e.target.value)}
-                    required
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>Location</Label>
-                  <Input
-                    theme={theme}
-                    type="text"
-                    value={eventLocation}
-                    onChange={(e) => setEventLocation(e.target.value)}
-                    placeholder="Event location"
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>Event Type</Label>
-                  <Select
-                    theme={theme}
-                    value={eventType}
-                    onChange={(e) => setEventType(e.target.value)}
-                  >
-                    <option value="meeting">Meeting</option>
-                    <option value="task">Task</option>
-                    <option value="reminder">Reminder</option>
-                    <option value="other">Other</option>
-                  </Select>
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>Color</Label>
-                  <Select
-                    theme={theme}
-                    value={eventColor}
-                    onChange={(e) => setEventColor(e.target.value)}
-                  >
-                    {EventColors.map(color => (
-                      <option key={color.value} value={color.value}>
-                        {color.name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormGroup>
-
-                <ButtonGroup>
-                  {selectedEvent && (
-                    <Button theme={theme} type="button" $variant="secondary" onClick={handleDeleteEvent}>
-                      Delete
-                    </Button>
-                  )}
-                  <Button theme={theme} type="button" $variant="secondary" onClick={() => setShowEventModal(false)}>
-                    Cancel
-                  </Button>
-                  <Button theme={theme} type="submit" $variant="primary">
-                    {selectedEvent ? 'Update' : 'Create'}
-                  </Button>
-                </ButtonGroup>
-              </Form>
-            </ModalContent>
-          </Modal>
+          <EventModal
+            theme={theme}
+            selectedEvent={selectedEvent}
+            eventTitle={eventTitle}
+            setEventTitle={setEventTitle}
+            eventDescription={eventDescription}
+            setEventDescription={setEventDescription}
+            eventStartTime={eventStartTime}
+            setEventStartTime={setEventStartTime}
+            eventEndTime={eventEndTime}
+            setEventEndTime={setEventEndTime}
+            eventLocation={eventLocation}
+            setEventLocation={setEventLocation}
+            eventType={eventType}
+            setEventType={setEventType}
+            eventColor={eventColor}
+            setEventColor={setEventColor}
+            isAllDay={isAllDay}
+            setIsAllDay={setIsAllDay}
+            recurrenceRule={recurrenceRule}
+            setRecurrenceRule={setRecurrenceRule}
+            reminderMinutes={reminderMinutes}
+            setReminderMinutes={setReminderMinutes}
+            participants={participants}
+            newParticipantEmail={newParticipantEmail}
+            setNewParticipantEmail={setNewParticipantEmail}
+            onAddParticipant={handleAddParticipant}
+            onRemoveParticipant={handleRemoveParticipant}
+            onClose={() => {
+              setShowEventModal(false);
+              resetForm();
+            }}
+            onSave={handleSaveEvent}
+            onDelete={handleDeleteEvent}
+          />
         )}
       </AnimatePresence>
-    </Container>
+    </S.Container>
   );
 };
 
