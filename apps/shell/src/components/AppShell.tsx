@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "@shared";
+import { supabase, useTheme } from "@shared";
 import Sidebar from "./Sidebar";
-import TabBar from "./TabBar";
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,27 +13,33 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import TextSummarizer from "../../../text-summarizer/src/TextSummarizer";
 import styled, { ThemeProvider } from "styled-components";
-import { theme } from "../theme";
 import type { Session } from "@supabase/supabase-js";
 
 const AppWrapper = styled.div`
   display: flex;
-  height: 100vh;
-  background: ${(props) => props.theme?.colors.background};
-  color: ${(props) => props.theme?.colors.text};
+  min-height: 100vh;
+  background: ${(props) => props.theme.colors.background};
+  color: ${(props) => props.theme.colors.text};
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
 `;
 
 const MainContent = styled.main`
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
 `;
 
 const AppShell: React.FC = () => {
-  const [session, setSession] = useState<Session | null>(
-    // supabase.auth.getSession()?.data?.session ?? null,
-    null,
-  );
+  const [session, setSession] = useState<Session | null>(null);
+  const { theme } = useTheme();
 
   const initAuth = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -84,7 +89,6 @@ const AppShell: React.FC = () => {
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </MainContent>
-          <TabBar />
         </AppWrapper>
       </Router>
     </ThemeProvider>

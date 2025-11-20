@@ -1,26 +1,39 @@
 import React from "react";
 import styled from "styled-components";
-import { supabase } from "@shared";
+import { supabase, useTheme } from "@shared";
 import { useNavigate } from "react-router-dom";
 
 const Button = styled.button`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.75rem 1.25rem;
-  color: #b794f4;
-  font-weight: 600;
+  background: ${props => props.theme.colors.background};
+  border: 1px solid ${props => props.theme.colors.border};
+  color: ${props => props.theme.colors.error};
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  width: 100%;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: ${props => props.theme.colors.error}15;
+    border-color: ${props => props.theme.colors.error}40;
   }
+`;
+
+const Icon = styled.span`
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Logout: React.FC = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -31,7 +44,12 @@ const Logout: React.FC = () => {
     }
   };
 
-  return <Button onClick={handleLogout}>Logout</Button>;
+  return (
+    <Button theme={theme} onClick={handleLogout}>
+      <Icon>🚪</Icon>
+      Logout
+    </Button>
+  );
 };
 
 export default Logout;
