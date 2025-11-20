@@ -278,8 +278,12 @@ const Login: React.FC = () => {
 
   async function signInWithGoogle() {
     setError(null);
+    const redirectUrl = window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        redirectTo: redirectUrl,
+      },
     });
     if (error) {
       setError(error.message);
