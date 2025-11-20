@@ -1,4 +1,4 @@
-# The Platform
+# The Mini Apps Platform
 
 A comprehensive productivity platform built with React, TypeScript, and Supabase. The Platform provides a suite of integrated mini-apps to help you manage your daily tasks, track habits, organize notes, and stay productive. Visit `https://miniapps.bolt.host/` for demo.
 
