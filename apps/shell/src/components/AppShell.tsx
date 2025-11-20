@@ -17,6 +17,8 @@ import TodoList from "../../../todo-list/src/TodoList";
 import PomodoroTimer from "../../../pomodoro-timer/src/PomodoroTimer";
 import NotesManager from "../../../notes-manager/src/NotesManager";
 import ShoppingList from "../../../shopping-list/src/ShoppingList";
+import CurrencyConverter from "../../../currency-converter/src/CurrencyConverter";
+import WeatherInfo from "../../../weather-info/src/WeatherInfo";
 import styled from "styled-components";
 import type { Session } from "@supabase/supabase-js";
 
@@ -101,6 +103,8 @@ const AppShell: React.FC = () => {
               <Route path="/apps/pomodoro-timer" element={<PomodoroTimer />} />
               <Route path="/apps/notes-manager" element={<NotesManager />} />
               <Route path="/apps/shopping-list" element={<ShoppingList />} />
+              <Route path="/apps/currency-converter" element={<CurrencyConverter />} />
+              <Route path="/apps/weather-info" element={<WeatherInfo />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </MainContent>

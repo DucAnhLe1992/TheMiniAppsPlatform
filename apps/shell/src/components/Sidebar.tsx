@@ -275,6 +275,14 @@ const Sidebar: React.FC = () => {
               <NavIcon>📄</NavIcon>
               Text Summarizer
             </NavItem>
+            <NavItem theme={theme} to="/apps/currency-converter" onClick={() => setIsOpen(false)}>
+              <NavIcon>💱</NavIcon>
+              Currency & Budget
+            </NavItem>
+            <NavItem theme={theme} to="/apps/weather-info" onClick={() => setIsOpen(false)}>
+              <NavIcon>🌤️</NavIcon>
+              Weather Info
+            </NavItem>
           </NavSection>
         </NavItems>
 
