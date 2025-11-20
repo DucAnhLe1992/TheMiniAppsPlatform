@@ -223,12 +223,42 @@ const ErrorMessage = styled(motion.div)`
   margin-bottom: 1rem;
 `;
 
+const ThemeToggle = styled(motion.button)`
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: ${props => props.theme.colors.surface};
+  border: 1px solid ${props => props.theme.colors.border};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.25rem;
+  box-shadow: ${props => props.theme.shadows.md};
+  z-index: 1000;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.theme.colors.surfaceHover};
+  }
+
+  @media (max-width: 768px) {
+    top: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+  }
+`;
+
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { theme } = useTheme();
+  const { theme, themeMode, toggleTheme } = useTheme();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -258,6 +288,14 @@ const Login: React.FC = () => {
 
   return (
     <PageContainer theme={theme}>
+      <ThemeToggle
+        theme={theme}
+        onClick={toggleTheme}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {themeMode === 'dark' ? '🌙' : '☀️'}
+      </ThemeToggle>
       <BackgroundGradient theme={theme} />
       <BackgroundGradient2 theme={theme} />
 

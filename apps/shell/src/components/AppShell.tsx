@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { supabase, useTheme } from "@shared";
+import { supabase } from "@shared";
 import Sidebar from "./Sidebar";
+import { ThemeWrapper } from "./ThemeWrapper";
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,7 +13,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import TextSummarizer from "../../../text-summarizer/src/TextSummarizer";
-import styled, { ThemeProvider } from "styled-components";
+import styled from "styled-components";
 import type { Session } from "@supabase/supabase-js";
 
 const AppWrapper = styled.div`
@@ -39,7 +40,6 @@ const MainContent = styled.main`
 
 const AppShell: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
-  const { theme } = useTheme();
 
   const initAuth = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -66,18 +66,20 @@ const AppShell: React.FC = () => {
 
   if (!session) {
     return (
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </Router>
+      <ThemeWrapper>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        </Router>
+      </ThemeWrapper>
     );
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeWrapper>
       <Router>
         <AppWrapper>
           <Sidebar />
@@ -91,7 +93,7 @@ const AppShell: React.FC = () => {
           </MainContent>
         </AppWrapper>
       </Router>
-    </ThemeProvider>
+    </ThemeWrapper>
   );
 };
 
