@@ -37,11 +37,17 @@ const Logout: React.FC = () => {
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) {
+    
+    // If there's an error but it's "Auth session missing", treat it as success
+    // since there's nothing to sign out from anyway
+    if (error && !error.message.includes('Auth session missing')) {
+      console.error("Logout error:", error);
       alert("Error during logout: " + error.message);
-    } else {
-      navigate("/login");
+      return;
     }
+    
+    // Navigate to login whether signOut succeeded or session was already missing
+    navigate("/login");
   };
 
   return (

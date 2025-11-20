@@ -77,42 +77,36 @@ const AppShell: React.FC = () => {
     };
   }, []);
 
-  if (!session) {
-    return (
-      <ThemeWrapper>
-        <Router>
+  return (
+    <ThemeWrapper>
+      <Router>
+        {!session ? (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
-        </Router>
-      </ThemeWrapper>
-    );
-  }
-
-  return (
-    <ThemeWrapper>
-      <Router>
-        <AppWrapper>
-          <Sidebar />
-          <MainContent>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/apps/text-summarizer" element={<TextSummarizer />} />
-              <Route path="/apps/todo-list" element={<TodoList />} />
-              <Route path="/apps/pomodoro-timer" element={<PomodoroTimer />} />
-              <Route path="/apps/notes-manager" element={<NotesManager />} />
-              <Route path="/apps/shopping-list" element={<ShoppingList />} />
-              <Route path="/apps/currency-converter" element={<CurrencyConverter />} />
-              <Route path="/apps/weather-info" element={<WeatherInfo />} />
-              <Route path="/apps/calendar" element={<Calendar />} />
-              <Route path="/apps/habit-tracker" element={<HabitTracker />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </MainContent>
-        </AppWrapper>
+        ) : (
+          <AppWrapper>
+            <Sidebar />
+            <MainContent>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/apps/text-summarizer" element={<TextSummarizer />} />
+                <Route path="/apps/todo-list" element={<TodoList />} />
+                <Route path="/apps/pomodoro-timer" element={<PomodoroTimer />} />
+                <Route path="/apps/notes-manager" element={<NotesManager />} />
+                <Route path="/apps/shopping-list" element={<ShoppingList />} />
+                <Route path="/apps/currency-converter" element={<CurrencyConverter />} />
+                <Route path="/apps/weather-info" element={<WeatherInfo />} />
+                <Route path="/apps/calendar" element={<Calendar />} />
+                <Route path="/apps/habit-tracker" element={<HabitTracker />} />
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </MainContent>
+          </AppWrapper>
+        )}
       </Router>
     </ThemeWrapper>
   );
