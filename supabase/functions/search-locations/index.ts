@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const OPENWEATHER_API_KEY = "25b18fa5cd964e22b69fa0c7e5c25dd7";
+const OPENWEATHER_API_KEY = Deno.env.get("OPENWEATHER_API_KEY") || "25b18fa5cd964e22b69fa0c7e5c25dd7";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -37,6 +37,25 @@ Deno.serve(async (req: Request) => {
     const response = await fetch(apiUrl);
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenWeather API Error:', response.status, errorText);
+      
+      if (response.status === 401) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Invalid API key. Please set up your OpenWeather API key in Supabase secrets.",
+            details: "Get a free API key at https://openweathermap.org/api"
+          }),
+          {
+            status: 500,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+      
       throw new Error(`Geocoding API error: ${response.status}`);
     }
 
