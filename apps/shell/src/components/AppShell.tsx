@@ -15,6 +15,7 @@ import Dashboard from "../pages/Dashboard";
 import TextSummarizer from "../../../text-summarizer/src/TextSummarizer";
 import TodoList from "../../../todo-list/src/TodoList";
 import PomodoroTimer from "../../../pomodoro-timer/src/PomodoroTimer";
+import NotesManager from "../../../notes-manager/src/NotesManager";
 import styled from "styled-components";
 import type { Session } from "@supabase/supabase-js";
 
@@ -97,6 +98,7 @@ const AppShell: React.FC = () => {
               <Route path="/apps/text-summarizer" element={<TextSummarizer />} />
               <Route path="/apps/todo-list" element={<TodoList />} />
               <Route path="/apps/pomodoro-timer" element={<PomodoroTimer />} />
+              <Route path="/apps/notes-manager" element={<NotesManager />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </MainContent>

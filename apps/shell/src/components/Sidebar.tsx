@@ -263,8 +263,12 @@ const Sidebar: React.FC = () => {
               <NavIcon>⏱️</NavIcon>
               Pomodoro Timer
             </NavItem>
-            <NavItem theme={theme} to="/apps/text-summarizer" onClick={() => setIsOpen(false)}>
+            <NavItem theme={theme} to="/apps/notes-manager" onClick={() => setIsOpen(false)}>
               <NavIcon>📝</NavIcon>
+              Notes & Snippets
+            </NavItem>
+            <NavItem theme={theme} to="/apps/text-summarizer" onClick={() => setIsOpen(false)}>
+              <NavIcon>📄</NavIcon>
               Text Summarizer
             </NavItem>
           </NavSection>
