@@ -21,8 +21,8 @@ const SidebarContainer = styled(motion.nav)<{ $isOpen: boolean }>`
     left: 0;
     top: 0;
     bottom: 0;
-    transform: ${props => props.$isOpen ? 'translateX(0)' : 'translateX(-100%)'};
-    transition: transform 0.3s ease;
+    transform: translateX(${props => props.$isOpen ? '0' : '-100%'});
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: ${props => props.$isOpen ? props.theme.shadows.xl : 'none'};
   }
 `;
@@ -170,7 +170,7 @@ const ThemeToggle = styled.button`
   }
 `;
 
-const MobileMenuButton = styled.button`
+const MobileMenuButton = styled.button<{ $isOpen: boolean }>`
   display: none;
   position: fixed;
   top: 1.5rem;
@@ -186,6 +186,9 @@ const MobileMenuButton = styled.button`
   cursor: pointer;
   color: ${props => props.theme.colors.text};
   box-shadow: ${props => props.theme.shadows.md};
+  transition: opacity 0.2s ease;
+  opacity: ${props => props.$isOpen ? '0' : '1'};
+  pointer-events: ${props => props.$isOpen ? 'none' : 'auto'};
 
   @media (max-width: 1024px) {
     display: flex;
@@ -198,7 +201,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <MobileMenuButton theme={theme} onClick={() => setIsOpen(true)}>
+      <MobileMenuButton theme={theme} $isOpen={isOpen} onClick={() => setIsOpen(true)}>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="6" x2="21" y2="6"/>
