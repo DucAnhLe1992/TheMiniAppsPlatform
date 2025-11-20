@@ -259,6 +259,10 @@ const Sidebar: React.FC = () => {
               <NavIcon>✅</NavIcon>
               To-Do List
             </NavItem>
+            <NavItem theme={theme} to="/apps/pomodoro-timer" onClick={() => setIsOpen(false)}>
+              <NavIcon>⏱️</NavIcon>
+              Pomodoro Timer
+            </NavItem>
             <NavItem theme={theme} to="/apps/text-summarizer" onClick={() => setIsOpen(false)}>
               <NavIcon>📝</NavIcon>
               Text Summarizer
