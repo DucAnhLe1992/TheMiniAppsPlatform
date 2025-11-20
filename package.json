@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config apps/shell/vite.config.ts",
-    "build": "vite build --config apps/shell/vite.config.ts",
+    "build": "cd apps/shell && vite build",
     "lint": "eslint .",
     "preview": "vite preview --config apps/shell/vite.config.ts"
   },

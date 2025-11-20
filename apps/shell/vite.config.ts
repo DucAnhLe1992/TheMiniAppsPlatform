@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  root: 'apps/shell',
+  root: '.',
   envDir: '../../',
   publicDir: 'public',
   build: {
@@ -13,8 +13,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(process.cwd(), 'apps/shell/src'),
-      '@shared': path.resolve(process.cwd(), 'libs/shared/src')
+      '@': path.resolve(process.cwd(), 'src'),
+      '@shared': path.resolve(process.cwd(), '../../libs/shared/src')
     }
   },
   server: {
