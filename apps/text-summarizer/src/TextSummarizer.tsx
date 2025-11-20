@@ -228,11 +228,29 @@ export const TextSummarizer: React.FC = () => {
     setSummary('');
 
     try {
-      const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [text];
-      const summaryText = sentences.slice(0, Math.max(1, Math.ceil(sentences.length / 3))).join(' ');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('Please sign in to use the text summarizer');
+        setLoading(false);
+        return;
+      }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/summarize-text`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate summary');
+      }
+
+      const { summary: summaryText } = await response.json();
       setSummary(summaryText);
 
       const { data: { user } } = await supabase.auth.getUser();
