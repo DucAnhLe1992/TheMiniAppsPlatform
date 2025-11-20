@@ -13,6 +13,16 @@ interface Location {
   is_default: boolean;
 }
 
+interface LocationSuggestion {
+  name: string;
+  city: string;
+  country: string;
+  state: string | null;
+  latitude: number;
+  longitude: number;
+  display: string;
+}
+
 interface WeatherData {
   temp: number;
   feels_like: number;
@@ -338,6 +348,61 @@ const EmptyText = styled.p`
   margin-bottom: 1.5rem;
 `;
 
+const SuggestionsList = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: ${props => props.theme.colors.surface};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 8px;
+  margin-top: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+`;
+
+const SuggestionItem = styled.div`
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${props => props.theme.colors.surfaceHover};
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${props => props.theme.colors.border};
+  }
+`;
+
+const SuggestionName = styled.div`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+`;
+
+const SuggestionDetails = styled.div`
+  font-size: 0.75rem;
+  color: ${props => props.theme.colors.textSecondary};
+  margin-top: 0.25rem;
+`;
+
+const LoadingText = styled.div`
+  text-align: center;
+  padding: 1rem;
+  color: ${props => props.theme.colors.textSecondary};
+  font-size: 0.875rem;
+`;
+
+const ErrorText = styled.div`
+  text-align: center;
+  padding: 1rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+`;
+
 const getWeatherIcon = (description: string): string => {
   const desc = description.toLowerCase();
   if (desc.includes('clear')) return '☀️';
@@ -428,6 +493,11 @@ const WeatherInfo: React.FC = () => {
   const [newLocationCountry, setNewLocationCountry] = useState('');
   const [newLocationLat, setNewLocationLat] = useState('');
   const [newLocationLon, setNewLocationLon] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingWeather, setIsLoadingWeather] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
 
   useEffect(() => {
     initUser();
@@ -466,11 +536,66 @@ const WeatherInfo: React.FC = () => {
   };
 
   const fetchWeather = async (location: Location) => {
-    const weatherData = await fetchWeatherData(location.latitude, location.longitude);
-    if (weatherData) setWeather(weatherData);
+    setIsLoadingWeather(true);
+    setWeatherError(null);
+    try {
+      const weatherData = await fetchWeatherData(location.latitude, location.longitude);
+      if (weatherData) {
+        setWeather(weatherData);
+      } else {
+        throw new Error('Failed to fetch weather data');
+      }
 
-    const forecastData = await fetchForecastData(location.latitude, location.longitude);
-    setForecast(forecastData);
+      const forecastData = await fetchForecastData(location.latitude, location.longitude);
+      setForecast(forecastData);
+    } catch (error) {
+      console.error('Error fetching weather:', error);
+      setWeatherError('Unable to fetch weather data. Please try again later.');
+    } finally {
+      setIsLoadingWeather(false);
+    }
+  };
+
+  const searchLocations = async (query: string) => {
+    if (query.length < 2) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/search-locations?q=${encodeURIComponent(query)}`;
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to search locations');
+
+      const data = await response.json();
+      setLocationSuggestions(data);
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      setLocationSuggestions([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleLocationSearchChange = (value: string) => {
+    setLocationSearch(value);
+    searchLocations(value);
+  };
+
+  const handleSelectSuggestion = (suggestion: LocationSuggestion) => {
+    setNewLocationName(suggestion.name);
+    setNewLocationCity(suggestion.city);
+    setNewLocationCountry(suggestion.country);
+    setNewLocationLat(suggestion.latitude.toString());
+    setNewLocationLon(suggestion.longitude.toString());
+    setLocationSearch(suggestion.display);
+    setLocationSuggestions([]);
   };
 
   const handleAddLocation = async (e: React.FormEvent) => {
@@ -497,6 +622,8 @@ const WeatherInfo: React.FC = () => {
       setNewLocationCountry('');
       setNewLocationLat('');
       setNewLocationLon('');
+      setLocationSearch('');
+      setLocationSuggestions([]);
     } catch (error) {
       console.error('Error adding location:', error);
     }
@@ -563,64 +690,63 @@ const WeatherInfo: React.FC = () => {
                 </ModalHeader>
 
                 <Form onSubmit={handleAddLocation}>
-                  <FormGroup>
-                    <Label theme={theme}>Location Name *</Label>
+                  <FormGroup style={{ position: 'relative' }}>
+                    <Label theme={theme}>Search Location *</Label>
                     <Input
                       theme={theme}
                       type="text"
-                      value={newLocationName}
-                      onChange={(e) => setNewLocationName(e.target.value)}
-                      placeholder="e.g., Home, Work, New York"
-                      required
+                      value={locationSearch}
+                      onChange={(e) => handleLocationSearchChange(e.target.value)}
+                      placeholder="Type a city name... e.g., New York, London, Tokyo"
+                      autoComplete="off"
                     />
+                    {isSearching && (
+                      <LoadingText theme={theme}>Searching...</LoadingText>
+                    )}
+                    {locationSuggestions.length > 0 && (
+                      <SuggestionsList theme={theme}>
+                        {locationSuggestions.map((suggestion, index) => (
+                          <SuggestionItem
+                            key={index}
+                            theme={theme}
+                            onClick={() => handleSelectSuggestion(suggestion)}
+                          >
+                            <SuggestionName theme={theme}>{suggestion.name}</SuggestionName>
+                            <SuggestionDetails theme={theme}>
+                              {suggestion.state && `${suggestion.state}, `}{suggestion.country}
+                            </SuggestionDetails>
+                          </SuggestionItem>
+                        ))}
+                      </SuggestionsList>
+                    )}
                   </FormGroup>
 
-                  <FormGroup>
-                    <Label theme={theme}>City *</Label>
-                    <Input
-                      theme={theme}
-                      type="text"
-                      value={newLocationCity}
-                      onChange={(e) => setNewLocationCity(e.target.value)}
-                      placeholder="e.g., New York"
-                      required
-                    />
-                  </FormGroup>
+                  {newLocationCity && (
+                    <>
+                      <FormGroup>
+                        <Label theme={theme}>Location Name *</Label>
+                        <Input
+                          theme={theme}
+                          type="text"
+                          value={newLocationName}
+                          onChange={(e) => setNewLocationName(e.target.value)}
+                          placeholder="e.g., Home, Work, Office"
+                          required
+                        />
+                      </FormGroup>
 
-                  <FormGroup>
-                    <Label theme={theme}>Country</Label>
-                    <Input
-                      theme={theme}
-                      type="text"
-                      value={newLocationCountry}
-                      onChange={(e) => setNewLocationCountry(e.target.value)}
-                      placeholder="e.g., USA"
-                    />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <Label theme={theme}>Latitude (optional)</Label>
-                    <Input
-                      theme={theme}
-                      type="number"
-                      step="0.000001"
-                      value={newLocationLat}
-                      onChange={(e) => setNewLocationLat(e.target.value)}
-                      placeholder="e.g., 40.7128"
-                    />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <Label theme={theme}>Longitude (optional)</Label>
-                    <Input
-                      theme={theme}
-                      type="number"
-                      step="0.000001"
-                      value={newLocationLon}
-                      onChange={(e) => setNewLocationLon(e.target.value)}
-                      placeholder="e.g., -74.0060"
-                    />
-                  </FormGroup>
+                      <FormGroup>
+                        <Label theme={theme}>Selected Location</Label>
+                        <Input
+                          theme={theme}
+                          type="text"
+                          value={`${newLocationCity}, ${newLocationCountry}`}
+                          readOnly
+                          disabled
+                        />
+                      </FormGroup>
+                    </>
+                  )}
 
                   <ButtonGroup>
                     <Button theme={theme} type="button" $variant="secondary" onClick={() => setShowLocationModal(false)}>
@@ -665,7 +791,24 @@ const WeatherInfo: React.FC = () => {
         ))}
       </LocationTabs>
 
-      {weather && selectedLocation && (
+      {isLoadingWeather && selectedLocation && (
+        <WeatherCard theme={theme}>
+          <LoadingText theme={theme}>Loading weather data...</LoadingText>
+        </WeatherCard>
+      )}
+
+      {weatherError && selectedLocation && (
+        <WeatherCard theme={theme}>
+          <ErrorText theme={theme}>{weatherError}</ErrorText>
+          <ButtonGroup style={{ justifyContent: 'center', marginTop: '1rem' }}>
+            <Button theme={theme} $variant="primary" onClick={() => fetchWeather(selectedLocation)}>
+              Retry
+            </Button>
+          </ButtonGroup>
+        </WeatherCard>
+      )}
+
+      {weather && selectedLocation && !isLoadingWeather && !weatherError && (
         <WeatherCard
           theme={theme}
           initial={{ opacity: 0, y: 20 }}
@@ -742,64 +885,63 @@ const WeatherInfo: React.FC = () => {
               </ModalHeader>
 
               <Form onSubmit={handleAddLocation}>
-                <FormGroup>
-                  <Label theme={theme}>Location Name *</Label>
+                <FormGroup style={{ position: 'relative' }}>
+                  <Label theme={theme}>Search Location *</Label>
                   <Input
                     theme={theme}
                     type="text"
-                    value={newLocationName}
-                    onChange={(e) => setNewLocationName(e.target.value)}
-                    placeholder="e.g., Home, Work, New York"
-                    required
+                    value={locationSearch}
+                    onChange={(e) => handleLocationSearchChange(e.target.value)}
+                    placeholder="Type a city name... e.g., New York, London, Tokyo"
+                    autoComplete="off"
                   />
+                  {isSearching && (
+                    <LoadingText theme={theme}>Searching...</LoadingText>
+                  )}
+                  {locationSuggestions.length > 0 && (
+                    <SuggestionsList theme={theme}>
+                      {locationSuggestions.map((suggestion, index) => (
+                        <SuggestionItem
+                          key={index}
+                          theme={theme}
+                          onClick={() => handleSelectSuggestion(suggestion)}
+                        >
+                          <SuggestionName theme={theme}>{suggestion.name}</SuggestionName>
+                          <SuggestionDetails theme={theme}>
+                            {suggestion.state && `${suggestion.state}, `}{suggestion.country}
+                          </SuggestionDetails>
+                        </SuggestionItem>
+                      ))}
+                    </SuggestionsList>
+                  )}
                 </FormGroup>
 
-                <FormGroup>
-                  <Label theme={theme}>City *</Label>
-                  <Input
-                    theme={theme}
-                    type="text"
-                    value={newLocationCity}
-                    onChange={(e) => setNewLocationCity(e.target.value)}
-                    placeholder="e.g., New York"
-                    required
-                  />
-                </FormGroup>
+                {newLocationCity && (
+                  <>
+                    <FormGroup>
+                      <Label theme={theme}>Location Name *</Label>
+                      <Input
+                        theme={theme}
+                        type="text"
+                        value={newLocationName}
+                        onChange={(e) => setNewLocationName(e.target.value)}
+                        placeholder="e.g., Home, Work, Office"
+                        required
+                      />
+                    </FormGroup>
 
-                <FormGroup>
-                  <Label theme={theme}>Country</Label>
-                  <Input
-                    theme={theme}
-                    type="text"
-                    value={newLocationCountry}
-                    onChange={(e) => setNewLocationCountry(e.target.value)}
-                    placeholder="e.g., USA"
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>Latitude (optional)</Label>
-                  <Input
-                    theme={theme}
-                    type="number"
-                    step="0.000001"
-                    value={newLocationLat}
-                    onChange={(e) => setNewLocationLat(e.target.value)}
-                    placeholder="e.g., 40.7128"
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label theme={theme}>Longitude (optional)</Label>
-                  <Input
-                    theme={theme}
-                    type="number"
-                    step="0.000001"
-                    value={newLocationLon}
-                    onChange={(e) => setNewLocationLon(e.target.value)}
-                    placeholder="e.g., -74.0060"
-                  />
-                </FormGroup>
+                    <FormGroup>
+                      <Label theme={theme}>Selected Location</Label>
+                      <Input
+                        theme={theme}
+                        type="text"
+                        value={`${newLocationCity}, ${newLocationCountry}`}
+                        readOnly
+                        disabled
+                      />
+                    </FormGroup>
+                  </>
+                )}
 
                 <ButtonGroup>
                   <Button theme={theme} type="button" $variant="secondary" onClick={() => setShowLocationModal(false)}>
