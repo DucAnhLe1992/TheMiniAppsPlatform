@@ -9,19 +9,15 @@ export default defineConfig({
   plugins: [react()],
   root: __dirname,
   base: '/',
-  envDir: path.join(__dirname, '../../'),
-  publicDir: path.join(__dirname, 'public'),
+  publicDir: 'public',
   build: {
-    outDir: path.join(__dirname, '../../dist/apps/shell'),
-    emptyOutDir: true,
-    rollupOptions: {
-      input: path.join(__dirname, 'index.html')
-    }
+    outDir: 'dist',
+    emptyOutDir: true
   },
   resolve: {
     alias: {
       '@': path.join(__dirname, 'src'),
-      '@shared': path.join(__dirname, '../../libs/shared/src')
+      '@shared': path.join(__dirname, 'libs/shared/src')
     }
   },
   server: {
