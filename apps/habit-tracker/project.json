@@ -1,0 +1,7 @@
+{
+  "name": "habit-tracker",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/habit-tracker/src",
+  "projectType": "application",
+  "targets": {}
+}

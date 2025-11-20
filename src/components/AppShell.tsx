@@ -19,6 +19,7 @@ import ShoppingList from "../../apps/shopping-list/src/ShoppingList";
 import CurrencyConverter from "../../apps/currency-converter/src/CurrencyConverter";
 import WeatherInfo from "../../apps/weather-info/src/WeatherInfo";
 import Calendar from "../../apps/calendar/src/Calendar";
+import HabitTracker from "../../apps/habit-tracker/src/HabitTracker";
 import styled from "styled-components";
 import type { Session } from "@supabase/supabase-js";
 
@@ -105,6 +106,7 @@ const AppShell: React.FC = () => {
               <Route path="/apps/currency-converter" element={<CurrencyConverter />} />
               <Route path="/apps/weather-info" element={<WeatherInfo />} />
               <Route path="/apps/calendar" element={<Calendar />} />
+              <Route path="/apps/habit-tracker" element={<HabitTracker />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </MainContent>
