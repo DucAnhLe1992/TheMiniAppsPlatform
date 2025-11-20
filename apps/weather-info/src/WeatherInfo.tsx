@@ -510,6 +510,18 @@ const WeatherInfo: React.FC = () => {
     }
   }, [selectedLocation]);
 
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (locationSearch.length >= 2) {
+        searchLocations(locationSearch);
+      } else {
+        setLocationSuggestions([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [locationSearch]);
+
   const initUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) setUserId(user.id);
@@ -585,7 +597,6 @@ const WeatherInfo: React.FC = () => {
 
   const handleLocationSearchChange = (value: string) => {
     setLocationSearch(value);
-    searchLocations(value);
   };
 
   const handleSelectSuggestion = (suggestion: LocationSuggestion) => {
@@ -702,6 +713,9 @@ const WeatherInfo: React.FC = () => {
                     />
                     {isSearching && (
                       <LoadingText theme={theme}>Searching...</LoadingText>
+                    )}
+                    {!isSearching && locationSearch.length >= 2 && locationSuggestions.length === 0 && (
+                      <ErrorText theme={theme}>No locations found. Try a different search term.</ErrorText>
                     )}
                     {locationSuggestions.length > 0 && (
                       <SuggestionsList theme={theme}>
@@ -897,6 +911,9 @@ const WeatherInfo: React.FC = () => {
                   />
                   {isSearching && (
                     <LoadingText theme={theme}>Searching...</LoadingText>
+                  )}
+                  {!isSearching && locationSearch.length >= 2 && locationSuggestions.length === 0 && (
+                    <ErrorText theme={theme}>No locations found. Try a different search term.</ErrorText>
                   )}
                   {locationSuggestions.length > 0 && (
                     <SuggestionsList theme={theme}>

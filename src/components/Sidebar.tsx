@@ -244,10 +244,6 @@ const Sidebar: React.FC = () => {
           <NavSection>
             <SectionLabel theme={theme}>Main</SectionLabel>
             <NavItem theme={theme} to="/" end onClick={() => setIsOpen(false)}>
-              <NavIcon>🏠</NavIcon>
-              Home
-            </NavItem>
-            <NavItem theme={theme} to="/dashboard" onClick={() => setIsOpen(false)}>
               <NavIcon>📊</NavIcon>
               Dashboard
             </NavItem>
@@ -282,6 +278,10 @@ const Sidebar: React.FC = () => {
             <NavItem theme={theme} to="/apps/weather-info" onClick={() => setIsOpen(false)}>
               <NavIcon>🌤️</NavIcon>
               Weather Info
+            </NavItem>
+            <NavItem theme={theme} to="/apps/calendar" onClick={() => setIsOpen(false)}>
+              <NavIcon>📅</NavIcon>
+              Calendar
             </NavItem>
           </NavSection>
         </NavItems>
