@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { lightTheme, darkTheme } from '../theme';
 
 export type ThemeMode = 'light' | 'dark';
@@ -9,7 +9,9 @@ export function useTheme() {
     return (stored as ThemeMode) || 'dark';
   });
 
-  const theme = themeMode === 'light' ? lightTheme : darkTheme;
+  const theme = useMemo(() => {
+    return themeMode === 'light' ? lightTheme : darkTheme;
+  }, [themeMode]);
 
   const toggleTheme = () => {
     setThemeMode((prev) => {

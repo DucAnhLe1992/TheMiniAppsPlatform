@@ -21,9 +21,10 @@ const AppWrapper = styled.div`
   min-height: 100vh;
   background: ${(props) => props.theme.colors.background};
   color: ${(props) => props.theme.colors.text};
+  position: relative;
 
   @media (max-width: 1024px) {
-    flex-direction: column;
+    display: block;
   }
 `;
 
@@ -33,8 +34,12 @@ const MainContent = styled.main`
   overflow-y: auto;
   min-height: 100vh;
 
+  @media (max-width: 1024px) {
+    padding-top: 5rem;
+  }
+
   @media (max-width: 768px) {
-    padding: 1.5rem 1rem;
+    padding: 5rem 1rem 1.5rem;
   }
 `;
 

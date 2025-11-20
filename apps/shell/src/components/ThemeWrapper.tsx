@@ -7,7 +7,7 @@ interface ThemeWrapperProps {
 }
 
 export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ children }) => {
-  const { theme, themeMode } = useTheme();
+  const { theme } = useTheme();
 
-  return <ThemeProvider key={themeMode} theme={theme}>{children}</ThemeProvider>;
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 };
