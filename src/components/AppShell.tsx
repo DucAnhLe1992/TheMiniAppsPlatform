@@ -11,6 +11,7 @@ import {
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+import Profile from "../pages/Profile";
 import TextSummarizer from "../../apps/text-summarizer/src/TextSummarizer";
 import TodoList from "../../apps/todo-list/src/TodoList";
 import PomodoroTimer from "../../apps/pomodoro-timer/src/PomodoroTimer";
@@ -98,6 +99,7 @@ const AppShell: React.FC = () => {
           <MainContent>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/apps/text-summarizer" element={<TextSummarizer />} />
               <Route path="/apps/todo-list" element={<TodoList />} />
               <Route path="/apps/pomodoro-timer" element={<PomodoroTimer />} />

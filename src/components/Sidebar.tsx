@@ -247,6 +247,10 @@ const Sidebar: React.FC = () => {
               <NavIcon>📊</NavIcon>
               Dashboard
             </NavItem>
+            <NavItem theme={theme} to="/profile" onClick={() => setIsOpen(false)}>
+              <NavIcon>👤</NavIcon>
+              Profile
+            </NavItem>
           </NavSection>
 
           <NavSection>
