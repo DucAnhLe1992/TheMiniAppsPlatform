@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@shared";
 import Sidebar from "./Sidebar";
+import Header from "./Header";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 import { ThemeWrapper } from "./ThemeWrapper";
 import {
   BrowserRouter as Router,
@@ -26,10 +28,10 @@ import type { Session } from "@supabase/supabase-js";
 
 const AppWrapper = styled.div`
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: ${(props) => props.theme.colors.background};
   color: ${(props) => props.theme.colors.text};
-  position: relative;
+  padding-top: 64px; /* Header height */
 
   @media (max-width: 1024px) {
     display: block;
@@ -40,14 +42,11 @@ const MainContent = styled.main`
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
-  min-height: 100vh;
+  height: calc(100vh - 64px); /* Full height minus header */
 
   @media (max-width: 1024px) {
-    padding-top: 5rem;
-  }
-
-  @media (max-width: 768px) {
-    padding: 5rem 1rem 1.5rem;
+    height: calc(100vh - 64px);
+    padding: 1.5rem 1rem;
   }
 `;
 
@@ -77,6 +76,34 @@ const AppShell: React.FC = () => {
     };
   }, []);
 
+  const AuthenticatedApp = () => {
+    useKeyboardShortcuts();
+    return (
+      <>
+        <Header />
+        <AppWrapper>
+          <Sidebar />
+          <MainContent>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/apps/text-summarizer" element={<TextSummarizer />} />
+              <Route path="/apps/todo-list" element={<TodoList />} />
+              <Route path="/apps/pomodoro-timer" element={<PomodoroTimer />} />
+              <Route path="/apps/notes-manager" element={<NotesManager />} />
+              <Route path="/apps/shopping-list" element={<ShoppingList />} />
+              <Route path="/apps/currency-converter" element={<CurrencyConverter />} />
+              <Route path="/apps/weather-info" element={<WeatherInfo />} />
+              <Route path="/apps/calendar" element={<Calendar />} />
+              <Route path="/apps/habit-tracker" element={<HabitTracker />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </MainContent>
+        </AppWrapper>
+      </>
+    );
+  };
+
   return (
     <ThemeWrapper>
       <Router>
@@ -87,25 +114,7 @@ const AppShell: React.FC = () => {
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         ) : (
-          <AppWrapper>
-            <Sidebar />
-            <MainContent>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/apps/text-summarizer" element={<TextSummarizer />} />
-                <Route path="/apps/todo-list" element={<TodoList />} />
-                <Route path="/apps/pomodoro-timer" element={<PomodoroTimer />} />
-                <Route path="/apps/notes-manager" element={<NotesManager />} />
-                <Route path="/apps/shopping-list" element={<ShoppingList />} />
-                <Route path="/apps/currency-converter" element={<CurrencyConverter />} />
-                <Route path="/apps/weather-info" element={<WeatherInfo />} />
-                <Route path="/apps/calendar" element={<Calendar />} />
-                <Route path="/apps/habit-tracker" element={<HabitTracker />} />
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </MainContent>
-          </AppWrapper>
+          <AuthenticatedApp />
         )}
       </Router>
     </ThemeWrapper>
