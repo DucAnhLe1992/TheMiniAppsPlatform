@@ -9,8 +9,8 @@ import Logout from "./Logout";
 const SidebarContainer = styled.nav<{ $isOpen: boolean }>`
   width: 280px;
   height: calc(100vh - 64px); /* Full height minus header */
-  padding: 1.5rem 1.5rem;
-  background: ${props => props.theme.colors.surface};
+  padding: 2rem 1.25rem;
+  background: ${props => props.theme.colors.backgroundElevated};
   border-right: 1px solid ${props => props.theme.colors.border};
   display: flex;
   flex-direction: column;
@@ -147,24 +147,26 @@ const NavItem = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 12px;
   color: ${props => props.theme.colors.textSecondary};
   text-decoration: none;
   font-weight: 500;
   font-size: 0.9375rem;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 
   &:hover {
     background: ${props => props.theme.colors.surfaceHover};
     color: ${props => props.theme.colors.text};
+    transform: translateX(2px);
   }
 
   &.active {
     background: ${props => props.theme.colors.primary};
     color: white;
     font-weight: 600;
+    box-shadow: 0 4px 12px ${props => props.theme.colors.primary}40;
   }
 `;
 

@@ -10,14 +10,15 @@ const HeaderContainer = styled.header`
   left: 0;
   right: 0;
   height: 64px;
-  background: ${p => p.theme.colors.surface};
+  background: ${p => p.theme.colors.backgroundElevated};
   border-bottom: 1px solid ${p => p.theme.colors.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   z-index: 200;
   box-shadow: ${p => p.theme.shadows.sm};
+  backdrop-filter: blur(8px);
 
   @media (max-width: 1024px) {
     padding: 0 1rem 0 5rem; /* Space for mobile hamburger */
@@ -38,22 +39,28 @@ const LogoSection = styled(NavLink)`
 `;
 
 const LogoIcon = styled.div`
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: ${p => p.theme.colors.gradient};
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap: 3px;
-  padding: 6px;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+  padding: 7px;
+  box-shadow: 0 6px 18px -6px rgba(102, 126, 234, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
   
   &::before,
   &::after {
     content: '';
     background: white;
     border-radius: 3px;
+  }
+
+  ${LogoSection}:hover & {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px -6px rgba(102, 126, 234, 0.3);
   }
 `;
 
@@ -113,30 +120,33 @@ const Breadcrumbs = styled.div`
 const SearchButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 8px;
+  gap: 0.625rem;
+  padding: 0.625rem 1rem;
+  border-radius: 10px;
   background: ${p => p.theme.colors.background};
   border: 1px solid ${p => p.theme.colors.border};
   cursor: pointer;
   font-size: 0.875rem;
   color: ${p => p.theme.colors.textSecondary};
-  transition: all 0.2s ease;
-  min-width: 200px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 220px;
+  box-shadow: ${p => p.theme.shadows.sm};
 
   &:hover {
     background: ${p => p.theme.colors.surfaceHover};
-    border-color: ${p => p.theme.colors.textSecondary};
+    border-color: ${p => p.theme.colors.primary};
+    box-shadow: ${p => p.theme.shadows.md};
   }
   
   kbd {
     font-size: 0.75rem;
-    padding: 0.125rem 0.375rem;
+    padding: 0.25rem 0.5rem;
     background: ${p => p.theme.colors.surface};
     border: 1px solid ${p => p.theme.colors.border};
-    border-radius: 4px;
-    font-family: monospace;
+    border-radius: 6px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
     margin-left: auto;
+    font-weight: 500;
   }
 `;
 
@@ -150,21 +160,24 @@ const ActionButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
   background: ${p => p.theme.colors.background};
   border: 1px solid ${p => p.theme.colors.border};
   cursor: pointer;
   font-size: 1.125rem;
   color: ${p => p.theme.colors.text};
-  transition: background 0.2s ease, transform 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: ${p => p.theme.shadows.sm};
 
   &:hover {
     background: ${p => p.theme.colors.surfaceHover};
+    border-color: ${p => p.theme.colors.primary};
+    box-shadow: ${p => p.theme.shadows.md};
   }
   &:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
 `;
 
@@ -172,21 +185,24 @@ const ProfileLink = styled(NavLink)`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
   background: ${p => p.theme.colors.background};
   border: 1px solid ${p => p.theme.colors.border};
   text-decoration: none;
   font-size: 1.05rem;
   color: ${p => p.theme.colors.text};
-  transition: background 0.2s ease, transform 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: ${p => p.theme.shadows.sm};
 
   &:hover { 
-    background: ${p => p.theme.colors.surfaceHover}; 
+    background: ${p => p.theme.colors.surfaceHover};
+    border-color: ${p => p.theme.colors.primary};
+    box-shadow: ${p => p.theme.shadows.md};
   }
   &:active { 
-    transform: scale(0.95); 
+    transform: scale(0.96); 
   }
   &.active { 
     background: ${p => p.theme.colors.primary}15;

@@ -40,13 +40,13 @@ const AppWrapper = styled.div`
 
 const MainContent = styled.main`
   flex: 1;
-  padding: 2rem;
+  padding: 2.25rem; /* a bit more breathing room */
   overflow-y: auto;
   height: calc(100vh - 64px); /* Full height minus header */
 
   @media (max-width: 1024px) {
     height: calc(100vh - 64px);
-    padding: 1.5rem 1rem;
+    padding: 1.75rem 1.125rem;
   }
 `;
 

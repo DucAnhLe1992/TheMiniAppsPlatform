@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
-import { glassmorphism } from "../theme";
+// Use theme-provided glassmorphism from ThemeProvider
 
 const TabBarContainer = styled.nav`
   position: fixed;
@@ -13,7 +13,7 @@ const TabBarContainer = styled.nav`
   gap: 2rem;
   align-items: center;
   justify-content: center;
-  ${glassmorphism}
+  ${props => props.theme.glassmorphism}
 
   @media (max-width: 768px) {
     left: 0;
