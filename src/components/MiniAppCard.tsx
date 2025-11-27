@@ -8,6 +8,8 @@ interface MiniAppCardProps {
   description: string;
   icon?: string;
   onClick: () => void;
+  tag?: string;
+  meta?: string;
 }
 
 const Card = styled(motion.div)<{ $mode: 'light' | 'dark' }>`
@@ -17,7 +19,7 @@ const Card = styled(motion.div)<{ $mode: 'light' | 'dark' }>`
   display: flex;
   flex-direction: column;
   gap: 1.125rem;
-  min-height: 200px;
+  aspect-ratio: 1 / 1; /* keep cards square */
   position: relative;
   overflow: hidden;
   margin: 4px; /* subtle outer margin to increase separation */
@@ -85,6 +87,30 @@ const TitleWrapper = styled.div`
   gap: 0.25rem;
 `;
 
+const MetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const Tag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: ${props => props.theme.colors.backgroundElevated};
+  border: 1px solid ${props => props.theme.colors.border};
+  color: ${props => props.theme.colors.textSecondary};
+`;
+
+const MetaText = styled.span`
+  font-size: 0.8rem;
+  color: ${props => props.theme.colors.textTertiary};
+`;
+
 const Title = styled.h3`
   margin: 0;
   font-size: 1.125rem;
@@ -102,50 +128,25 @@ const Description = styled.p`
   flex: 1;
   font-weight: 400;
   letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 768px) {
+    -webkit-line-clamp: 2;
+  }
 `;
 
-const Footer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 1rem;
-`;
-
-const LaunchButton = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${props => props.theme.colors.primary};
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: -0.01em;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  background: ${props => props.theme.colors.primary}08;
-  border: 1px solid ${props => props.theme.colors.primary}20;
-  
-  ${Card}:hover & {
-    background: ${props => props.theme.colors.primary}15;
-    border-color: ${props => props.theme.colors.primary}40;
-    transform: translateX(2px);
-  }
-  
-  svg {
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  ${Card}:hover & svg {
-    transform: translateX(2px);
-  }
-`;
 
 const MiniAppCard: React.FC<MiniAppCardProps> = ({
   title,
   description,
   icon = "🚀",
   onClick,
+  tag,
+  meta,
 }) => {
   const { theme, themeMode } = useTheme();
 
@@ -163,17 +164,16 @@ const MiniAppCard: React.FC<MiniAppCardProps> = ({
         <IconContainer theme={theme}>{icon}</IconContainer>
         <TitleWrapper>
           <Title theme={theme}>{title}</Title>
+          {(tag || meta) && (
+            <MetaRow>
+              {tag && <Tag theme={theme}>{tag}</Tag>}
+              {meta && <MetaText theme={theme}>{meta}</MetaText>}
+            </MetaRow>
+          )}
         </TitleWrapper>
       </Header>
       <Description theme={theme}>{description}</Description>
-      <Footer theme={theme}>
-        <LaunchButton theme={theme}>
-          Open
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 12l4-4-4-4"/>
-          </svg>
-        </LaunchButton>
-      </Footer>
+      {/* Removed Open button; card remains clickable */}
     </Card>
   );
 };

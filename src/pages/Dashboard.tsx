@@ -92,15 +92,22 @@ const CategoryTitle = styled.h2`
 `;
 
 const Grid = styled.div`
+  --cardSize: clamp(240px, 26vw, 320px);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.75rem;
-  padding: 0.25rem 0.25rem; /* subtle breathing room around cards */
+  grid-template-columns: repeat(auto-fill, minmax(var(--cardSize), var(--cardSize)));
+  justify-content: center; /* prevent tracks from stretching to fill leftover space */
+  gap: 1.5rem;
+  padding: 0.25rem 0.25rem;
+
+  @media (min-width: 1400px) {
+    --cardSize: clamp(240px, 22vw, 300px);
+  }
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-    padding: 0; 
+    grid-template-columns: repeat(auto-fill, minmax(var(--cardSize), var(--cardSize)));
+    justify-content: center;
+    gap: 1.1rem;
+    padding: 0;
   }
 `;
 
@@ -226,15 +233,22 @@ const Dashboard: React.FC = () => {
           <Grid>
             {apps
               .filter((app) => app.category === category)
-              .map((app) => (
-                <MiniAppCard
-                  key={app.id}
-                  title={app.name}
-                  description={app.description}
-                  icon={app.icon || categoryIcons[category] || "🚀"}
-                  onClick={() => handleMiniAppClick(app.entry_point)}
-                />
-              ))}
+              .map((app) => {
+                const ep = app.entry_point || "";
+                const isBeta = /habit-tracker|weather-info/.test(ep);
+                const meta = isBeta ? "Beta" : undefined;
+                return (
+                  <MiniAppCard
+                    key={app.id}
+                    title={app.name}
+                    description={app.description}
+                    icon={app.icon || categoryIcons[category] || "🚀"}
+                    tag={category}
+                    meta={meta}
+                    onClick={() => handleMiniAppClick(app.entry_point)}
+                  />
+                );
+              })}
           </Grid>
         </CategorySection>
       ))}
