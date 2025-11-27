@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useTheme } from '@shared';
-import { Event } from '../types';
+import React from "react";
+import styled from "styled-components";
+import { useTheme } from "@shared";
+import { Event } from "../types";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -11,8 +11,8 @@ interface WeekViewProps {
 }
 
 const WeekGrid = styled.div`
-  background: ${props => props.theme.colors.surface};
-  border: 1px solid ${props => props.theme.colors.border};
+  background: ${(props) => props.theme.colors.surface};
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 12px;
   overflow-x: auto;
 `;
@@ -20,8 +20,8 @@ const WeekGrid = styled.div`
 const Header = styled.div`
   display: grid;
   grid-template-columns: 80px repeat(7, 1fr);
-  border-bottom: 2px solid ${props => props.theme.colors.border};
-  background: ${props => props.theme.colors.background};
+  border-bottom: 2px solid ${(props) => props.theme.colors.border};
+  background: ${(props) => props.theme.colors.background};
 `;
 
 const HeaderCell = styled.div`
@@ -29,40 +29,41 @@ const HeaderCell = styled.div`
   text-align: center;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${props => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
 `;
 
 const TimeColumn = styled.div`
   padding: 0.5rem;
   font-size: 0.75rem;
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${(props) => props.theme.colors.textSecondary};
   text-align: right;
-  border-right: 1px solid ${props => props.theme.colors.border};
+  border-right: 1px solid ${(props) => props.theme.colors.border};
 `;
 
 const DayColumn = styled.div<{ $isToday: boolean }>`
-  border-right: 1px solid ${props => props.theme.colors.border};
+  border-right: 1px solid ${(props) => props.theme.colors.border};
   position: relative;
   min-height: 60px;
   cursor: pointer;
-  background: ${props => props.$isToday ? props.theme.colors.primaryLight : 'transparent'};
+  background: ${(props) =>
+    props.$isToday ? `${props.theme.colors.accentLight}20` : "transparent"};
 
   &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
+    background: ${(props) => props.theme.colors.surfaceHover};
   }
 `;
 
 const TimeRow = styled.div`
   display: grid;
   grid-template-columns: 80px repeat(7, 1fr);
-  border-bottom: 1px solid ${props => props.theme.colors.border};
+  border-bottom: 1px solid ${(props) => props.theme.colors.border};
 `;
 
 const EventBlock = styled.div<{ $color: string }>`
   position: absolute;
   left: 2px;
   right: 2px;
-  background: ${props => props.$color};
+  background: ${(props) => props.$color};
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -78,7 +79,12 @@ const EventBlock = styled.div<{ $color: string }>`
   }
 `;
 
-const WeekView: React.FC<WeekViewProps> = ({ currentDate, events, onTimeSlotClick, onEventClick }) => {
+const WeekView: React.FC<WeekViewProps> = ({
+  currentDate,
+  events,
+  onTimeSlotClick,
+  onEventClick,
+}) => {
   const { theme } = useTheme();
 
   const getWeekDays = () => {
@@ -104,12 +110,14 @@ const WeekView: React.FC<WeekViewProps> = ({ currentDate, events, onTimeSlotClic
   };
 
   const getEventsForDayAndHour = (day: Date, hour: number) => {
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventStart = new Date(event.start_time);
-      return eventStart.getDate() === day.getDate() &&
-             eventStart.getMonth() === day.getMonth() &&
-             eventStart.getFullYear() === day.getFullYear() &&
-             eventStart.getHours() === hour;
+      return (
+        eventStart.getDate() === day.getDate() &&
+        eventStart.getMonth() === day.getMonth() &&
+        eventStart.getFullYear() === day.getFullYear() &&
+        eventStart.getHours() === hour
+      );
     });
   };
 
@@ -119,14 +127,18 @@ const WeekView: React.FC<WeekViewProps> = ({ currentDate, events, onTimeSlotClic
         <HeaderCell theme={theme}>Time</HeaderCell>
         {weekDays.map((day, i) => (
           <HeaderCell key={i} theme={theme}>
-            {day.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            {day.toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            })}
           </HeaderCell>
         ))}
       </Header>
-      {hours.map(hour => (
+      {hours.map((hour) => (
         <TimeRow key={hour}>
           <TimeColumn theme={theme}>
-            {hour.toString().padStart(2, '0')}:00
+            {hour.toString().padStart(2, "0")}:00
           </TimeColumn>
           {weekDays.map((day, dayIndex) => {
             const dayEvents = getEventsForDayAndHour(day, hour);
@@ -141,7 +153,7 @@ const WeekView: React.FC<WeekViewProps> = ({ currentDate, events, onTimeSlotClic
                   onTimeSlotClick(clickedDate);
                 }}
               >
-                {dayEvents.map(event => (
+                {dayEvents.map((event) => (
                   <EventBlock
                     key={event.id}
                     $color={event.color}

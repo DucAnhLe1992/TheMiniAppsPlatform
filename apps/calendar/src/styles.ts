@@ -1,5 +1,5 @@
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import styled from "styled-components";
+import { motion } from "framer-motion";
 
 export const Container = styled.div`
   max-width: 1400px;
@@ -14,7 +14,7 @@ export const Header = styled.div`
 export const Title = styled.h1`
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${props => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
   margin-bottom: 0.5rem;
 
   @media (max-width: 768px) {
@@ -24,7 +24,7 @@ export const Title = styled.h1`
 
 export const Subtitle = styled.p`
   font-size: 1.125rem;
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${(props) => props.theme.colors.textSecondary};
   margin: 0;
 `;
 
@@ -44,7 +44,7 @@ export const NavButtons = styled.div`
   flex-wrap: wrap;
 `;
 
-export const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
+export const Button = styled.button<{ $variant?: "primary" | "secondary" }>`
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -52,12 +52,22 @@ export const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: ${props => props.$variant === 'primary' ? props.theme.colors.primary : props.theme.colors.surface};
-  color: ${props => props.$variant === 'primary' ? '#ffffff' : props.theme.colors.text};
-  border: ${props => props.$variant === 'secondary' ? `1px solid ${props.theme.colors.border}` : 'none'};
+  background: ${(props) =>
+    props.$variant === "primary"
+      ? props.theme.colors.primary
+      : props.theme.colors.surface};
+  color: ${(props) =>
+    props.$variant === "primary" ? "#ffffff" : props.theme.colors.text};
+  border: ${(props) =>
+    props.$variant === "secondary"
+      ? `1px solid ${props.theme.colors.border}`
+      : "none"};
 
   &:hover {
-    background: ${props => props.$variant === 'primary' ? props.theme.colors.primaryHover : props.theme.colors.surfaceHover};
+    background: ${(props) =>
+      props.$variant === "primary"
+        ? props.theme.colors.primaryHover
+        : props.theme.colors.surfaceHover};
   }
 
   &:disabled {
@@ -69,10 +79,10 @@ export const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
 export const ViewTabs = styled.div`
   display: flex;
   gap: 0.5rem;
-  background: ${props => props.theme.colors.surface};
+  background: ${(props) => props.theme.colors.surface};
   padding: 0.25rem;
   border-radius: 8px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 1px solid ${(props) => props.theme.colors.border};
 `;
 
 export const ViewTab = styled.button<{ $active: boolean }>`
@@ -83,38 +93,42 @@ export const ViewTab = styled.button<{ $active: boolean }>`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: ${props => props.$active ? props.theme.colors.primary : 'transparent'};
-  color: ${props => props.$active ? '#ffffff' : props.theme.colors.text};
+  background: ${(props) =>
+    props.$active ? props.theme.colors.primary : "transparent"};
+  color: ${(props) => (props.$active ? "#ffffff" : props.theme.colors.text)};
 
   &:hover {
-    background: ${props => props.$active ? props.theme.colors.primaryHover : props.theme.colors.surfaceHover};
+    background: ${(props) =>
+      props.$active
+        ? props.theme.colors.primaryHover
+        : props.theme.colors.surfaceHover};
   }
 `;
 
 export const MonthTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${props => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
   margin: 0;
 `;
 
 export const SearchBar = styled.input`
   padding: 0.75rem 1rem;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
-  background: ${props => props.theme.colors.surface};
-  color: ${props => props.theme.colors.text};
+  background: ${(props) => props.theme.colors.surface};
+  color: ${(props) => props.theme.colors.text};
   font-size: 1rem;
   width: 100%;
   max-width: 300px;
 
   &:focus {
     outline: none;
-    border-color: ${props => props.theme.colors.primary};
+    border-color: ${(props) => props.theme.colors.primary};
   }
 
   &::placeholder {
-    color: ${props => props.theme.colors.textSecondary};
+    color: ${(props) => props.theme.colors.textSecondary};
   }
 `;
 
@@ -130,7 +144,7 @@ export const Modal = styled(motion.div)`
 `;
 
 export const ModalContent = styled(motion.div)`
-  background: ${props => props.theme.colors.surface};
+  background: ${(props) => props.theme.colors.surface};
   border-radius: 16px;
   padding: 2rem;
   max-width: 600px;
@@ -149,7 +163,7 @@ export const ModalHeader = styled.div`
 export const ModalTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${props => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
   margin: 0;
 `;
 
@@ -158,7 +172,7 @@ export const CloseButton = styled.button`
   height: 32px;
   border: none;
   background: transparent;
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${(props) => props.theme.colors.textSecondary};
   cursor: pointer;
   border-radius: 6px;
   display: flex;
@@ -167,7 +181,7 @@ export const CloseButton = styled.button`
   font-size: 1.5rem;
 
   &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
+    background: ${(props) => props.theme.colors.surfaceHover};
   }
 `;
 
@@ -186,20 +200,20 @@ export const FormGroup = styled.div`
 export const Label = styled.label`
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${props => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
 `;
 
 export const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
-  background: ${props => props.theme.colors.background};
-  color: ${props => props.theme.colors.text};
+  background: ${(props) => props.theme.colors.background};
+  color: ${(props) => props.theme.colors.text};
   font-size: 1rem;
 
   &:focus {
     outline: none;
-    border-color: ${props => props.theme.colors.primary};
+    border-color: ${(props) => props.theme.colors.primary};
   }
 
   &:disabled {
@@ -210,32 +224,32 @@ export const Input = styled.input`
 
 export const TextArea = styled.textarea`
   padding: 0.75rem;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
-  background: ${props => props.theme.colors.background};
-  color: ${props => props.theme.colors.text};
+  background: ${(props) => props.theme.colors.background};
+  color: ${(props) => props.theme.colors.text};
   font-size: 1rem;
   min-height: 100px;
   resize: vertical;
 
   &:focus {
     outline: none;
-    border-color: ${props => props.theme.colors.primary};
+    border-color: ${(props) => props.theme.colors.primary};
   }
 `;
 
 export const Select = styled.select`
   padding: 0.75rem;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
-  background: ${props => props.theme.colors.background};
-  color: ${props => props.theme.colors.text};
+  background: ${(props) => props.theme.colors.background};
+  color: ${(props) => props.theme.colors.text};
   font-size: 1rem;
   cursor: pointer;
 
   &:focus {
     outline: none;
-    border-color: ${props => props.theme.colors.primary};
+    border-color: ${(props) => props.theme.colors.primary};
   }
 `;
 
@@ -258,7 +272,7 @@ export const FilterBar = styled.div`
 export const FilterLabel = styled.span`
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${props => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
 `;
 
 export const ParticipantList = styled.div`
@@ -272,7 +286,7 @@ export const ParticipantItem = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem;
-  background: ${props => props.theme.colors.background};
+  background: ${(props) => props.theme.colors.background};
   border-radius: 6px;
 `;
 
@@ -284,17 +298,21 @@ export const ParticipantInfo = styled.div`
 
 export const ParticipantEmail = styled.span`
   font-size: 0.875rem;
-  color: ${props => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.text};
 `;
 
 export const ParticipantStatus = styled.span<{ $status: string }>`
   font-size: 0.75rem;
-  color: ${props => {
+  color: ${(props) => {
     switch (props.$status) {
-      case 'accepted': return '#10b981';
-      case 'declined': return '#ef4444';
-      case 'tentative': return '#f59e0b';
-      default: return props.theme.colors.textSecondary;
+      case "accepted":
+        return "#10b981";
+      case "declined":
+        return "#ef4444";
+      case "tentative":
+        return "#f59e0b";
+      default:
+        return props.theme.colors.textSecondary;
     }
   }};
   text-transform: capitalize;
@@ -304,21 +322,21 @@ export const RemoveButton = styled.button`
   padding: 0.25rem 0.5rem;
   border: none;
   background: transparent;
-  color: ${props => props.theme.colors.error};
+  color: ${(props) => props.theme.colors.error};
   cursor: pointer;
   font-size: 0.875rem;
   border-radius: 4px;
 
   &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
+    background: ${(props) => props.theme.colors.surfaceHover};
   }
 `;
 
 export const AddButton = styled.button`
   padding: 0.5rem 1rem;
-  border: 1px dashed ${props => props.theme.colors.border};
+  border: 1px dashed ${(props) => props.theme.colors.border};
   background: transparent;
-  color: ${props => props.theme.colors.primary};
+  color: ${(props) => props.theme.colors.primary};
   cursor: pointer;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -326,7 +344,7 @@ export const AddButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
-    border-color: ${props => props.theme.colors.primary};
+    background: ${(props) => props.theme.colors.surfaceHover};
+    border-color: ${(props) => props.theme.colors.primary};
   }
 `;

@@ -1,9 +1,16 @@
-import React from 'react';
-import * as S from '../styles';
-import { Event, Participant, EventColors, RecurrenceOptions, ReminderOptions } from '../types';
+import React from "react";
+import { DefaultTheme } from "styled-components";
+import * as S from "../styles";
+import {
+  Event,
+  Participant,
+  EventColors,
+  RecurrenceOptions,
+  ReminderOptions,
+} from "../types";
 
 interface EventModalProps {
-  theme: any;
+  theme: DefaultTheme;
   selectedEvent: Event | null;
   eventTitle: string;
   setEventTitle: (value: string) => void;
@@ -83,7 +90,7 @@ const EventModal: React.FC<EventModalProps> = ({
       >
         <S.ModalHeader>
           <S.ModalTitle theme={theme}>
-            {selectedEvent ? 'Edit Event' : 'New Event'}
+            {selectedEvent ? "Edit Event" : "New Event"}
           </S.ModalTitle>
           <S.CloseButton theme={theme} onClick={onClose}>
             ✕
@@ -119,7 +126,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 type="checkbox"
                 checked={isAllDay}
                 onChange={(e) => setIsAllDay(e.target.checked)}
-                style={{ marginRight: '0.5rem' }}
+                style={{ marginRight: "0.5rem" }}
               />
               All-day event
             </S.Label>
@@ -129,8 +136,8 @@ const EventModal: React.FC<EventModalProps> = ({
             <S.Label theme={theme}>Start Time *</S.Label>
             <S.Input
               theme={theme}
-              type={isAllDay ? 'date' : 'datetime-local'}
-              value={isAllDay ? eventStartTime.split('T')[0] : eventStartTime}
+              type={isAllDay ? "date" : "datetime-local"}
+              value={isAllDay ? eventStartTime.split("T")[0] : eventStartTime}
               onChange={(e) => setEventStartTime(e.target.value)}
               required
             />
@@ -140,8 +147,8 @@ const EventModal: React.FC<EventModalProps> = ({
             <S.Label theme={theme}>End Time *</S.Label>
             <S.Input
               theme={theme}
-              type={isAllDay ? 'date' : 'datetime-local'}
-              value={isAllDay ? eventEndTime.split('T')[0] : eventEndTime}
+              type={isAllDay ? "date" : "datetime-local"}
+              value={isAllDay ? eventEndTime.split("T")[0] : eventEndTime}
               onChange={(e) => setEventEndTime(e.target.value)}
               required
             />
@@ -179,7 +186,7 @@ const EventModal: React.FC<EventModalProps> = ({
               value={eventColor}
               onChange={(e) => setEventColor(e.target.value)}
             >
-              {EventColors.map(color => (
+              {EventColors.map((color) => (
                 <option key={color.value} value={color.value}>
                   {color.name}
                 </option>
@@ -194,7 +201,7 @@ const EventModal: React.FC<EventModalProps> = ({
               value={recurrenceRule}
               onChange={(e) => setRecurrenceRule(e.target.value)}
             >
-              {RecurrenceOptions.map(option => (
+              {RecurrenceOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -209,7 +216,7 @@ const EventModal: React.FC<EventModalProps> = ({
               value={reminderMinutes}
               onChange={(e) => setReminderMinutes(parseInt(e.target.value))}
             >
-              {ReminderOptions.map(option => (
+              {ReminderOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -226,7 +233,10 @@ const EventModal: React.FC<EventModalProps> = ({
                     <S.ParticipantEmail theme={theme}>
                       {participant.email}
                     </S.ParticipantEmail>
-                    <S.ParticipantStatus theme={theme} $status={participant.status}>
+                    <S.ParticipantStatus
+                      theme={theme}
+                      $status={participant.status}
+                    >
                       {participant.status}
                     </S.ParticipantStatus>
                   </S.ParticipantInfo>
@@ -241,7 +251,9 @@ const EventModal: React.FC<EventModalProps> = ({
               ))}
             </S.ParticipantList>
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+            <div
+              style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}
+            >
               <S.Input
                 theme={theme}
                 type="email"
@@ -249,7 +261,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 onChange={(e) => setNewParticipantEmail(e.target.value)}
                 placeholder="Add participant email"
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     onAddParticipant();
                   }
@@ -268,15 +280,25 @@ const EventModal: React.FC<EventModalProps> = ({
 
           <S.ButtonGroup>
             {selectedEvent && (
-              <S.Button theme={theme} type="button" $variant="secondary" onClick={onDelete}>
+              <S.Button
+                theme={theme}
+                type="button"
+                $variant="secondary"
+                onClick={onDelete}
+              >
                 Delete
               </S.Button>
             )}
-            <S.Button theme={theme} type="button" $variant="secondary" onClick={onClose}>
+            <S.Button
+              theme={theme}
+              type="button"
+              $variant="secondary"
+              onClick={onClose}
+            >
               Cancel
             </S.Button>
             <S.Button theme={theme} type="submit" $variant="primary">
-              {selectedEvent ? 'Update' : 'Create'}
+              {selectedEvent ? "Update" : "Create"}
             </S.Button>
           </S.ButtonGroup>
         </S.Form>

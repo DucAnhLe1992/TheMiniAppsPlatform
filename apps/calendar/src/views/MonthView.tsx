@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useTheme } from '@shared';
-import { Event } from '../types';
+import React from "react";
+import styled from "styled-components";
+import { useTheme } from "@shared";
+import { Event } from "../types";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -11,8 +11,8 @@ interface MonthViewProps {
 }
 
 const CalendarGrid = styled.div`
-  background: ${props => props.theme.colors.surface};
-  border: 1px solid ${props => props.theme.colors.border};
+  background: ${(props) => props.theme.colors.surface};
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 12px;
   overflow: hidden;
 `;
@@ -20,8 +20,8 @@ const CalendarGrid = styled.div`
 const WeekdayHeader = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: ${props => props.theme.colors.background};
-  border-bottom: 2px solid ${props => props.theme.colors.border};
+  background: ${(props) => props.theme.colors.background};
+  border-bottom: 2px solid ${(props) => props.theme.colors.border};
 `;
 
 const WeekdayCell = styled.div`
@@ -29,7 +29,7 @@ const WeekdayCell = styled.div`
   text-align: center;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${(props) => props.theme.colors.textSecondary};
   text-transform: uppercase;
 
   @media (max-width: 768px) {
@@ -50,27 +50,31 @@ const DaysGrid = styled.div`
 
 const DayCell = styled.div<{ $isToday: boolean; $isOtherMonth: boolean }>`
   padding: 0.5rem;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 1px solid ${(props) => props.theme.colors.border};
   cursor: pointer;
   transition: background 0.2s ease;
-  background: ${props => props.$isOtherMonth ? props.theme.colors.background : 'transparent'};
+  background: ${(props) =>
+    props.$isOtherMonth ? props.theme.colors.background : "transparent"};
   position: relative;
   overflow: hidden;
 
   &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
+    background: ${(props) => props.theme.colors.surfaceHover};
   }
 
-  ${props => props.$isToday && `
-    background: ${props.theme.colors.primaryLight};
+  ${(props) =>
+    props.$isToday &&
+    `
+    background: ${props.theme.colors.accentLight}20;
     font-weight: 700;
   `}
 `;
 
 const DayNumber = styled.div<{ $isToday: boolean }>`
   font-size: 0.875rem;
-  font-weight: ${props => props.$isToday ? '700' : '600'};
-  color: ${props => props.$isToday ? props.theme.colors.primary : props.theme.colors.text};
+  font-weight: ${(props) => (props.$isToday ? "700" : "600")};
+  color: ${(props) =>
+    props.$isToday ? props.theme.colors.primary : props.theme.colors.text};
   margin-bottom: 0.25rem;
 
   @media (max-width: 768px) {
@@ -79,7 +83,7 @@ const DayNumber = styled.div<{ $isToday: boolean }>`
 `;
 
 const EventBadge = styled.div<{ $color: string }>`
-  background: ${props => props.$color};
+  background: ${(props) => props.$color};
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -101,7 +105,12 @@ const EventBadge = styled.div<{ $color: string }>`
   }
 `;
 
-const MonthView: React.FC<MonthViewProps> = ({ currentDate, events, onDayClick, onEventClick }) => {
+const MonthView: React.FC<MonthViewProps> = ({
+  currentDate,
+  events,
+  onDayClick,
+  onEventClick,
+}) => {
   const { theme } = useTheme();
 
   const getDaysInMonth = () => {
@@ -132,33 +141,39 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, events, onDayClick, 
   };
 
   const getEventsForDay = (date: Date) => {
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventDate = new Date(event.start_time);
-      return eventDate.getDate() === date.getDate() &&
-             eventDate.getMonth() === date.getMonth() &&
-             eventDate.getFullYear() === date.getFullYear();
+      return (
+        eventDate.getDate() === date.getDate() &&
+        eventDate.getMonth() === date.getMonth() &&
+        eventDate.getFullYear() === date.getFullYear()
+      );
     });
   };
 
   const isToday = (date: Date) => {
     const today = new Date();
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   };
 
   const isOtherMonth = (date: Date) => {
     return date.getMonth() !== currentDate.getMonth();
   };
 
-  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const days = getDaysInMonth();
 
   return (
     <CalendarGrid theme={theme}>
       <WeekdayHeader theme={theme}>
-        {weekdays.map(day => (
-          <WeekdayCell key={day} theme={theme}>{day}</WeekdayCell>
+        {weekdays.map((day) => (
+          <WeekdayCell key={day} theme={theme}>
+            {day}
+          </WeekdayCell>
         ))}
       </WeekdayHeader>
       <DaysGrid>
@@ -175,7 +190,7 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, events, onDayClick, 
               <DayNumber theme={theme} $isToday={isToday(day)}>
                 {day.getDate()}
               </DayNumber>
-              {dayEvents.slice(0, 2).map(event => (
+              {dayEvents.slice(0, 2).map((event) => (
                 <EventBadge
                   key={event.id}
                   $color={event.color}

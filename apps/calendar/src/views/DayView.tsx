@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useTheme } from '@shared';
-import { Event } from '../types';
+import React from "react";
+import styled from "styled-components";
+import { useTheme } from "@shared";
+import { Event } from "../types";
 
 interface DayViewProps {
   currentDate: Date;
@@ -11,8 +11,8 @@ interface DayViewProps {
 }
 
 const DayGrid = styled.div`
-  background: ${props => props.theme.colors.surface};
-  border: 1px solid ${props => props.theme.colors.border};
+  background: ${(props) => props.theme.colors.surface};
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 12px;
   overflow: hidden;
 `;
@@ -20,16 +20,16 @@ const DayGrid = styled.div`
 const TimeSlot = styled.div`
   display: grid;
   grid-template-columns: 100px 1fr;
-  border-bottom: 1px solid ${props => props.theme.colors.border};
+  border-bottom: 1px solid ${(props) => props.theme.colors.border};
   min-height: 60px;
 `;
 
 const TimeLabel = styled.div`
   padding: 0.75rem;
   font-size: 0.875rem;
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${(props) => props.theme.colors.textSecondary};
   text-align: right;
-  border-right: 2px solid ${props => props.theme.colors.border};
+  border-right: 2px solid ${(props) => props.theme.colors.border};
 `;
 
 const EventArea = styled.div`
@@ -39,12 +39,12 @@ const EventArea = styled.div`
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${props => props.theme.colors.surfaceHover};
+    background: ${(props) => props.theme.colors.surfaceHover};
   }
 `;
 
 const EventBlock = styled.div<{ $color: string }>`
-  background: ${props => props.$color};
+  background: ${(props) => props.$color};
   color: white;
   padding: 0.5rem;
   border-radius: 6px;
@@ -68,29 +68,36 @@ const EventTime = styled.div`
   opacity: 0.9;
 `;
 
-const DayView: React.FC<DayViewProps> = ({ currentDate, events, onTimeSlotClick, onEventClick }) => {
+const DayView: React.FC<DayViewProps> = ({
+  currentDate,
+  events,
+  onTimeSlotClick,
+  onEventClick,
+}) => {
   const { theme } = useTheme();
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const getEventsForHour = (hour: number) => {
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventStart = new Date(event.start_time);
-      return eventStart.getDate() === currentDate.getDate() &&
-             eventStart.getMonth() === currentDate.getMonth() &&
-             eventStart.getFullYear() === currentDate.getFullYear() &&
-             eventStart.getHours() === hour;
+      return (
+        eventStart.getDate() === currentDate.getDate() &&
+        eventStart.getMonth() === currentDate.getMonth() &&
+        eventStart.getFullYear() === currentDate.getFullYear() &&
+        eventStart.getHours() === hour
+      );
     });
   };
 
   return (
     <DayGrid theme={theme}>
-      {hours.map(hour => {
+      {hours.map((hour) => {
         const hourEvents = getEventsForHour(hour);
         return (
           <TimeSlot key={hour}>
             <TimeLabel theme={theme}>
-              {hour.toString().padStart(2, '0')}:00
+              {hour.toString().padStart(2, "0")}:00
             </TimeLabel>
             <EventArea
               theme={theme}
@@ -100,7 +107,7 @@ const DayView: React.FC<DayViewProps> = ({ currentDate, events, onTimeSlotClick,
                 onTimeSlotClick(clickedDate);
               }}
             >
-              {hourEvents.map(event => {
+              {hourEvents.map((event) => {
                 const start = new Date(event.start_time);
                 const end = new Date(event.end_time);
                 return (
@@ -114,10 +121,19 @@ const DayView: React.FC<DayViewProps> = ({ currentDate, events, onTimeSlotClick,
                   >
                     <EventTitle>{event.title}</EventTitle>
                     <EventTime>
-                      {start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} -
-                      {end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                      {start.toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      -
+                      {end.toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </EventTime>
-                    {event.location && <EventTime>📍 {event.location}</EventTime>}
+                    {event.location && (
+                      <EventTime>📍 {event.location}</EventTime>
+                    )}
                   </EventBlock>
                 );
               })}

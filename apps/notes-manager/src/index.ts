@@ -1,1 +1,1 @@
-export { default } from './NotesManager';
+export { default } from "./NotesManager";

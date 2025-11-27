@@ -1,69 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import { supabase, useTheme } from '@shared';
-import { AnimatePresence } from 'framer-motion';
-import { Event, ViewMode, EventColors, RecurrenceOptions, ReminderOptions, Participant } from './types';
-import * as S from './styles';
-import MonthView from './views/MonthView';
-import WeekView from './views/WeekView';
-import DayView from './views/DayView';
-import AgendaView from './views/AgendaView';
-import EventModal from './components/EventModal';
+import React, { useState, useEffect, useCallback } from "react";
+import { supabase, useTheme } from "@shared";
+import { AnimatePresence } from "framer-motion";
+import { Event, ViewMode, Participant } from "./types";
+import * as S from "./styles";
+import MonthView from "./views/MonthView";
+import WeekView from "./views/WeekView";
+import DayView from "./views/DayView";
+import AgendaView from "./views/AgendaView";
+import EventModal from "./components/EventModal";
+
+// Supabase typing workaround for insert/update during refactor
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db: any = supabase;
 
 const Calendar: React.FC = () => {
   const { theme } = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>('month');
+  const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [showEventModal, setShowEventModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
 
-  const [eventTitle, setEventTitle] = useState('');
-  const [eventDescription, setEventDescription] = useState('');
-  const [eventStartTime, setEventStartTime] = useState('');
-  const [eventEndTime, setEventEndTime] = useState('');
-  const [eventLocation, setEventLocation] = useState('');
-  const [eventType, setEventType] = useState('meeting');
-  const [eventColor, setEventColor] = useState('#3b82f6');
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventStartTime, setEventStartTime] = useState("");
+  const [eventEndTime, setEventEndTime] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [eventType, setEventType] = useState("meeting");
+  const [eventColor, setEventColor] = useState("#3b82f6");
   const [isAllDay, setIsAllDay] = useState(false);
-  const [recurrenceRule, setRecurrenceRule] = useState('');
+  const [recurrenceRule, setRecurrenceRule] = useState("");
   const [reminderMinutes, setReminderMinutes] = useState(15);
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [newParticipantEmail, setNewParticipantEmail] = useState('');
-
-  useEffect(() => {
-    initUser();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchEvents();
-    }
-  }, [userId, currentDate, viewMode]);
-
-  useEffect(() => {
-    filterEvents();
-  }, [events, searchQuery, filterType]);
+  const [newParticipantEmail, setNewParticipantEmail] = useState("");
 
   const initUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) setUserId(user.id);
   };
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     if (!userId) return;
 
     let startDate: Date;
     let endDate: Date;
 
-    if (viewMode === 'month') {
-      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
-    } else if (viewMode === 'week') {
+    if (viewMode === "month") {
+      startDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      );
+      endDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+      );
+    } else if (viewMode === "week") {
       const day = currentDate.getDay();
       startDate = new Date(currentDate);
       startDate.setDate(currentDate.getDate() - day);
@@ -71,7 +73,7 @@ const Calendar: React.FC = () => {
       endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 6);
       endDate.setHours(23, 59, 59, 999);
-    } else if (viewMode === 'day') {
+    } else if (viewMode === "day") {
       startDate = new Date(currentDate);
       startDate.setHours(0, 0, 0, 0);
       endDate = new Date(currentDate);
@@ -84,47 +86,65 @@ const Calendar: React.FC = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .gte('start_time', startDate.toISOString())
-        .lte('start_time', endDate.toISOString())
-        .order('start_time', { ascending: true });
+      const { data, error } = await db
+        .from("events")
+        .select("*")
+        .gte("start_time", startDate.toISOString())
+        .lte("start_time", endDate.toISOString())
+        .order("start_time", { ascending: true });
 
       if (error) throw error;
       setEvents(data || []);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error("Error fetching events:", error);
     }
-  };
+  }, [userId, currentDate, viewMode]);
 
-  const filterEvents = () => {
+  const filterEvents = useCallback(() => {
     let filtered = events;
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(query) ||
-        (event.description && event.description.toLowerCase().includes(query)) ||
-        (event.location && event.location.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        (event) =>
+          event.title.toLowerCase().includes(query) ||
+          (event.description &&
+            event.description.toLowerCase().includes(query)) ||
+          (event.location && event.location.toLowerCase().includes(query))
       );
     }
 
-    if (filterType !== 'all') {
-      filtered = filtered.filter(event => event.event_type === filterType);
+    if (filterType !== "all") {
+      filtered = filtered.filter((event) => event.event_type === filterType);
     }
 
     setFilteredEvents(filtered);
-  };
+  }, [events, searchQuery, filterType]);
+
+  useEffect(() => {
+    initUser();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchEvents();
+    }
+  }, [userId, currentDate, viewMode, fetchEvents]);
+
+  useEffect(() => {
+    filterEvents();
+  }, [events, searchQuery, filterType, filterEvents]);
 
   const handlePrevPeriod = () => {
-    if (viewMode === 'month') {
-      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-    } else if (viewMode === 'week') {
+    if (viewMode === "month") {
+      setCurrentDate(
+        new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+      );
+    } else if (viewMode === "week") {
       const newDate = new Date(currentDate);
       newDate.setDate(currentDate.getDate() - 7);
       setCurrentDate(newDate);
-    } else if (viewMode === 'day') {
+    } else if (viewMode === "day") {
       const newDate = new Date(currentDate);
       newDate.setDate(currentDate.getDate() - 1);
       setCurrentDate(newDate);
@@ -132,13 +152,15 @@ const Calendar: React.FC = () => {
   };
 
   const handleNextPeriod = () => {
-    if (viewMode === 'month') {
-      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-    } else if (viewMode === 'week') {
+    if (viewMode === "month") {
+      setCurrentDate(
+        new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+      );
+    } else if (viewMode === "week") {
       const newDate = new Date(currentDate);
       newDate.setDate(currentDate.getDate() + 7);
       setCurrentDate(newDate);
-    } else if (viewMode === 'day') {
+    } else if (viewMode === "day") {
       const newDate = new Date(currentDate);
       newDate.setDate(currentDate.getDate() + 1);
       setCurrentDate(newDate);
@@ -150,11 +172,10 @@ const Calendar: React.FC = () => {
   };
 
   const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
     setSelectedEvent(null);
     resetForm();
 
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = date.toISOString().split("T")[0];
     setEventStartTime(`${dateStr}T09:00`);
     setEventEndTime(`${dateStr}T10:00`);
 
@@ -164,12 +185,12 @@ const Calendar: React.FC = () => {
   const handleEventClick = async (event: Event) => {
     setSelectedEvent(event);
     setEventTitle(event.title);
-    setEventDescription(event.description || '');
-    setEventLocation(event.location || '');
+    setEventDescription(event.description || "");
+    setEventLocation(event.location || "");
     setEventType(event.event_type);
     setEventColor(event.color);
     setIsAllDay(event.is_all_day);
-    setRecurrenceRule(event.recurrence_rule || '');
+    setRecurrenceRule(event.recurrence_rule || "");
     setReminderMinutes(event.reminder_minutes || 15);
 
     const startTime = new Date(event.start_time).toISOString().slice(0, 16);
@@ -183,15 +204,15 @@ const Calendar: React.FC = () => {
 
   const fetchParticipants = async (eventId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('event_participants')
-        .select('*')
-        .eq('event_id', eventId);
+      const { data, error } = await db
+        .from("event_participants")
+        .select("*")
+        .eq("event_id", eventId);
 
       if (error) throw error;
       setParticipants(data || []);
     } catch (error) {
-      console.error('Error fetching participants:', error);
+      console.error("Error fetching participants:", error);
     }
   };
 
@@ -200,14 +221,14 @@ const Calendar: React.FC = () => {
 
     const newParticipant: Participant = {
       id: `temp-${Date.now()}`,
-      event_id: selectedEvent?.id || '',
+      event_id: selectedEvent?.id || "",
       email: newParticipantEmail,
       name: null,
-      status: 'pending',
+      status: "pending",
     };
 
     setParticipants([...participants, newParticipant]);
-    setNewParticipantEmail('');
+    setNewParticipantEmail("");
   };
 
   const handleRemoveParticipant = (index: number) => {
@@ -215,16 +236,16 @@ const Calendar: React.FC = () => {
   };
 
   const resetForm = () => {
-    setEventTitle('');
-    setEventDescription('');
-    setEventLocation('');
-    setEventType('meeting');
-    setEventColor('#3b82f6');
+    setEventTitle("");
+    setEventDescription("");
+    setEventLocation("");
+    setEventType("meeting");
+    setEventColor("#3b82f6");
     setIsAllDay(false);
-    setRecurrenceRule('');
+    setRecurrenceRule("");
     setReminderMinutes(15);
     setParticipants([]);
-    setNewParticipantEmail('');
+    setNewParticipantEmail("");
   };
 
   const handleSaveEvent = async (e: React.FormEvent) => {
@@ -249,20 +270,17 @@ const Calendar: React.FC = () => {
       let eventId: string;
 
       if (selectedEvent) {
-        const { error } = await supabase
-          .from('events')
+        const { error } = await db
+          .from("events")
           .update(eventData)
-          .eq('id', selectedEvent.id);
+          .eq("id", selectedEvent.id);
         if (error) throw error;
         eventId = selectedEvent.id;
 
-        await supabase
-          .from('event_participants')
-          .delete()
-          .eq('event_id', eventId);
+        await db.from("event_participants").delete().eq("event_id", eventId);
       } else {
-        const { data, error } = await supabase
-          .from('events')
+        const { data, error } = await db
+          .from("events")
           .insert(eventData)
           .select()
           .single();
@@ -271,15 +289,15 @@ const Calendar: React.FC = () => {
       }
 
       if (participants.length > 0) {
-        const participantData = participants.map(p => ({
+        const participantData = participants.map((p) => ({
           event_id: eventId,
           email: p.email,
           name: p.name,
           status: p.status,
         }));
 
-        const { error } = await supabase
-          .from('event_participants')
+        const { error } = await db
+          .from("event_participants")
           .insert(participantData);
         if (error) throw error;
       }
@@ -288,18 +306,18 @@ const Calendar: React.FC = () => {
       setShowEventModal(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving event:', error);
+      console.error("Error saving event:", error);
     }
   };
 
   const handleDeleteEvent = async () => {
-    if (!selectedEvent || !confirm('Delete this event?')) return;
+    if (!selectedEvent || !confirm("Delete this event?")) return;
 
     try {
-      const { error } = await supabase
-        .from('events')
+      const { error } = await db
+        .from("events")
         .delete()
-        .eq('id', selectedEvent.id);
+        .eq("id", selectedEvent.id);
 
       if (error) throw error;
 
@@ -307,23 +325,38 @@ const Calendar: React.FC = () => {
       setShowEventModal(false);
       resetForm();
     } catch (error) {
-      console.error('Error deleting event:', error);
+      console.error("Error deleting event:", error);
     }
   };
 
   const getPeriodTitle = () => {
-    if (viewMode === 'month') {
-      return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    } else if (viewMode === 'week') {
+    if (viewMode === "month") {
+      return currentDate.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
+    } else if (viewMode === "week") {
       const start = new Date(currentDate);
       start.setDate(currentDate.getDate() - currentDate.getDay());
       const end = new Date(start);
       end.setDate(start.getDate() + 6);
-      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-    } else if (viewMode === 'day') {
-      return currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      return `${start.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })} - ${end.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`;
+    } else if (viewMode === "day") {
+      return currentDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
     } else {
-      return 'Upcoming Events';
+      return "Upcoming Events";
     }
   };
 
@@ -336,16 +369,28 @@ const Calendar: React.FC = () => {
 
       <S.Controls>
         <S.NavButtons>
-          {viewMode !== 'agenda' && (
+          {viewMode !== "agenda" && (
             <>
-              <S.Button theme={theme} $variant="secondary" onClick={handlePrevPeriod}>
+              <S.Button
+                theme={theme}
+                $variant="secondary"
+                onClick={handlePrevPeriod}
+              >
                 ←
               </S.Button>
               <S.MonthTitle theme={theme}>{getPeriodTitle()}</S.MonthTitle>
-              <S.Button theme={theme} $variant="secondary" onClick={handleNextPeriod}>
+              <S.Button
+                theme={theme}
+                $variant="secondary"
+                onClick={handleNextPeriod}
+              >
                 →
               </S.Button>
-              <S.Button theme={theme} $variant="secondary" onClick={handleToday}>
+              <S.Button
+                theme={theme}
+                $variant="secondary"
+                onClick={handleToday}
+              >
                 Today
               </S.Button>
             </>
@@ -353,16 +398,32 @@ const Calendar: React.FC = () => {
         </S.NavButtons>
 
         <S.ViewTabs theme={theme}>
-          <S.ViewTab theme={theme} $active={viewMode === 'month'} onClick={() => setViewMode('month')}>
+          <S.ViewTab
+            theme={theme}
+            $active={viewMode === "month"}
+            onClick={() => setViewMode("month")}
+          >
             Month
           </S.ViewTab>
-          <S.ViewTab theme={theme} $active={viewMode === 'week'} onClick={() => setViewMode('week')}>
+          <S.ViewTab
+            theme={theme}
+            $active={viewMode === "week"}
+            onClick={() => setViewMode("week")}
+          >
             Week
           </S.ViewTab>
-          <S.ViewTab theme={theme} $active={viewMode === 'day'} onClick={() => setViewMode('day')}>
+          <S.ViewTab
+            theme={theme}
+            $active={viewMode === "day"}
+            onClick={() => setViewMode("day")}
+          >
             Day
           </S.ViewTab>
-          <S.ViewTab theme={theme} $active={viewMode === 'agenda'} onClick={() => setViewMode('agenda')}>
+          <S.ViewTab
+            theme={theme}
+            $active={viewMode === "agenda"}
+            onClick={() => setViewMode("agenda")}
+          >
             Agenda
           </S.ViewTab>
         </S.ViewTabs>
@@ -377,7 +438,11 @@ const Calendar: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         <S.FilterLabel theme={theme}>Filter:</S.FilterLabel>
-        <S.Select theme={theme} value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+        <S.Select
+          theme={theme}
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+        >
           <option value="all">All Events</option>
           <option value="meeting">Meetings</option>
           <option value="task">Tasks</option>
@@ -386,7 +451,7 @@ const Calendar: React.FC = () => {
         </S.Select>
       </S.FilterBar>
 
-      {viewMode === 'month' && (
+      {viewMode === "month" && (
         <MonthView
           currentDate={currentDate}
           events={filteredEvents}
@@ -395,7 +460,7 @@ const Calendar: React.FC = () => {
         />
       )}
 
-      {viewMode === 'week' && (
+      {viewMode === "week" && (
         <WeekView
           currentDate={currentDate}
           events={filteredEvents}
@@ -404,7 +469,7 @@ const Calendar: React.FC = () => {
         />
       )}
 
-      {viewMode === 'day' && (
+      {viewMode === "day" && (
         <DayView
           currentDate={currentDate}
           events={filteredEvents}
@@ -413,11 +478,8 @@ const Calendar: React.FC = () => {
         />
       )}
 
-      {viewMode === 'agenda' && (
-        <AgendaView
-          events={filteredEvents}
-          onEventClick={handleEventClick}
-        />
+      {viewMode === "agenda" && (
+        <AgendaView events={filteredEvents} onEventClick={handleEventClick} />
       )}
 
       <AnimatePresence>
