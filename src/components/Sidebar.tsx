@@ -9,7 +9,7 @@ import Logout from "./Logout";
 const SidebarContainer = styled.nav<{ $isOpen: boolean }>`
   width: 280px;
   height: calc(100vh - 64px); /* Full height minus header */
-  padding: 2rem 1.25rem;
+  padding: 2rem 1.25rem 3.25rem; /* extra bottom space to avoid footer collision */
   background: ${props => props.theme.colors.backgroundElevated};
   border-right: 1px solid ${props => props.theme.colors.border};
   display: flex;

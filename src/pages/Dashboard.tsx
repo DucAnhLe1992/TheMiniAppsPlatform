@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import MiniAppCard from "../components/MiniAppCard";
+import Banner from "../components/Banner";
 import { useApps, useTheme } from "@shared";
 
 const Container = styled.div`
@@ -193,6 +194,14 @@ const Dashboard: React.FC = () => {
 
   return (
     <Container>
+      <Banner
+        userName={undefined}
+        todaySummary={"Here’s a quick overview of your day."}
+        onQuickAddEvent={() => navigate("/apps/calendar")}
+        onQuickAddTask={() => navigate("/apps/todo-list")}
+        onStartPomodoro={() => navigate("/apps/pomodoro-timer")}
+        onLearnMore={() => navigate("/about")}
+      />
       <Header>
         <Title theme={theme}>Dashboard</Title>
         <Subtitle theme={theme}>
