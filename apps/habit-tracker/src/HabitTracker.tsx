@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { supabase, useTheme } from "@shared";
+import { supabase, useTheme, AppStats, StatItem } from "@shared";
 import { AnimatePresence } from "framer-motion";
 import {
   Container,
@@ -65,6 +65,7 @@ const HabitTracker: React.FC = () => {
     icon: ICONS[0],
     frequency: "daily" as "daily" | "weekly",
   });
+  const [stats, setStats] = useState<StatItem[]>([]);
 
   const loadData = useCallback(async () => {
     try {
@@ -103,6 +104,70 @@ const HabitTracker: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    calculateStats();
+  }, [habits, completions]);
+
+  const calculateStats = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const totalHabits = habits.length;
+      const todayCompletions = completions.length;
+      const completionRate =
+        totalHabits > 0
+          ? Math.round((todayCompletions / totalHabits) * 100)
+          : 0;
+
+      const { data: allCompletions } = await supabase
+        .from("habit_completions")
+        .select("completed_date")
+        .eq("user_id", user.id);
+
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekAgoStr = weekAgo.toISOString().split("T")[0];
+
+      const weekCompletions = (allCompletions || []).filter(
+        (c) => c.completed_date >= weekAgoStr
+      ).length;
+
+      const totalCompletions = allCompletions?.length || 0;
+
+      setStats([
+        {
+          icon: "🎯",
+          value: totalHabits,
+          label: "Active Habits",
+          subtext: `${todayCompletions} done today`,
+        },
+        {
+          icon: "✅",
+          value: `${completionRate}%`,
+          label: "Today's Rate",
+          subtext: "Keep going!",
+        },
+        {
+          icon: "📈",
+          value: weekCompletions,
+          label: "This Week",
+          subtext: "Weekly progress",
+        },
+        {
+          icon: "🔥",
+          value: totalCompletions,
+          label: "All Time",
+          subtext: "Total completions",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error calculating stats:", error);
+    }
+  };
 
   // (Removed duplicate loadData definition)
 
@@ -267,6 +332,8 @@ const HabitTracker: React.FC = () => {
           Build better habits, one day at a time
         </Subtitle>
       </Header>
+
+      <AppStats stats={stats} loading={loading} />
 
       <Controls>
         <DateNav>

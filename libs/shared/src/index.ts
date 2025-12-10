@@ -6,3 +6,5 @@ export * from './hooks/useUserPreferences';
 export * from './hooks/useTheme';
 export * from './theme';
 export * from './contexts/ThemeContext';
+export { default as AppStats } from './components/AppStats';
+export type { StatItem } from './components/AppStats';

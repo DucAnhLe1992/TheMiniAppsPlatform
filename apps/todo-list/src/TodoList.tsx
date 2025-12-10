@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { supabase, useTheme } from "@shared";
+import { supabase, useTheme, AppStats, StatItem } from "@shared";
 import { AnimatePresence } from "framer-motion";
 import { Todo, FilterType, SortType } from "./types";
 import {
@@ -59,6 +59,7 @@ const TodoList: React.FC = () => {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [stats, setStats] = useState<StatItem[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -69,7 +70,12 @@ const TodoList: React.FC = () => {
 
   useEffect(() => {
     fetchTodos();
+    fetchStats();
   }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [todos]);
 
   const fetchTodos = async () => {
     try {
@@ -84,6 +90,64 @@ const TodoList: React.FC = () => {
       console.error("Error fetching todos:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const totalTasks = todos.length;
+      const completedTasks = todos.filter((t) => t.completed).length;
+      const activeTasks = totalTasks - completedTasks;
+      const completionRate =
+        totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+      const now = new Date();
+      const overdueTasks = todos.filter(
+        (t) => !t.completed && t.due_date && new Date(t.due_date) < now
+      ).length;
+
+      const highPriorityTasks = todos.filter(
+        (t) => !t.completed && t.priority === "high"
+      ).length;
+
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const completedToday = todos.filter(
+        (t) => t.completed && t.completed_at && new Date(t.completed_at) >= todayStart
+      ).length;
+
+      setStats([
+        {
+          icon: "📊",
+          value: totalTasks,
+          label: "Total Tasks",
+          subtext: `${activeTasks} active`,
+        },
+        {
+          icon: "✅",
+          value: completedTasks,
+          label: "Completed",
+          subtext: `${completionRate}% rate`,
+        },
+        {
+          icon: "🔥",
+          value: completedToday,
+          label: "Done Today",
+          subtext: "Keep it up!",
+        },
+        {
+          icon: highPriorityTasks > 0 ? "⚠️" : "🎯",
+          value: highPriorityTasks,
+          label: "High Priority",
+          subtext: overdueTasks > 0 ? `${overdueTasks} overdue` : "All on track",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
     }
   };
 
@@ -245,6 +309,8 @@ const TodoList: React.FC = () => {
           Organize your tasks and stay productive
         </Subtitle>
       </Header>
+
+      <AppStats stats={stats} loading={loading} />
 
       <Controls>
         <SearchInput

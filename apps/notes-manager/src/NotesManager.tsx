@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { supabase, useTheme } from "@shared";
+import { supabase, useTheme, AppStats, StatItem } from "@shared";
 import { AnimatePresence } from "framer-motion";
 import {
   Container,
@@ -73,10 +73,15 @@ const NotesManager: React.FC = () => {
     color: COLORS[0],
   });
   const [tagInput, setTagInput] = useState("");
+  const [stats, setStats] = useState<StatItem[]>([]);
 
   useEffect(() => {
     fetchNotes();
   }, []);
+
+  useEffect(() => {
+    calculateStats();
+  }, [notes]);
 
   const fetchNotes = async () => {
     try {
@@ -92,6 +97,54 @@ const NotesManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateStats = () => {
+    const totalNotes = notes.length;
+    const favoriteNotes = notes.filter((n) => n.is_favorite).length;
+
+    const totalWords = notes.reduce((acc, note) => {
+      const words = note.content.trim().split(/\s+/).length;
+      return acc + words;
+    }, 0);
+
+    const codeNotes = notes.filter((n) => n.content_type === "code").length;
+
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const recentNotes = notes.filter(
+      (n) => new Date(n.created_at) >= weekAgo
+    ).length;
+
+    const allTags = notes.flatMap((n) => n.tags || []);
+    const uniqueTags = new Set(allTags).size;
+
+    setStats([
+      {
+        icon: "📝",
+        value: totalNotes,
+        label: "Total Notes",
+        subtext: `${favoriteNotes} favorites`,
+      },
+      {
+        icon: "📊",
+        value: totalWords.toLocaleString(),
+        label: "Total Words",
+        subtext: "Keep writing!",
+      },
+      {
+        icon: "💻",
+        value: codeNotes,
+        label: "Code Snippets",
+        subtext: `${uniqueTags} tags`,
+      },
+      {
+        icon: "🔥",
+        value: recentNotes,
+        label: "This Week",
+        subtext: "Recently added",
+      },
+    ]);
   };
 
   const handleAddNote = async (e: React.FormEvent) => {
@@ -266,6 +319,8 @@ const NotesManager: React.FC = () => {
         <Title theme={theme}>Notes & Snippets</Title>
         <Subtitle theme={theme}>Capture ideas and save code snippets</Subtitle>
       </Header>
+
+      <AppStats stats={stats} loading={loading} />
 
       <Controls>
         <SearchInput

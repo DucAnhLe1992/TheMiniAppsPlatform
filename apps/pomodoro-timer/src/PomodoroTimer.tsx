@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { supabase, useTheme } from "@shared";
+import { supabase, useTheme, AppStats, StatItem } from "@shared";
 import { Session, SessionType, TimerStatus, DURATIONS } from "./types";
 import {
   Container,
@@ -56,6 +56,7 @@ const PomodoroTimer: React.FC = () => {
     weekSessions: 0,
     totalSessions: 0,
   });
+  const [overviewStats, setOverviewStats] = useState<StatItem[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -158,21 +159,56 @@ const PomodoroTimer: React.FC = () => {
         (s: Session) => new Date(s.completed_at) >= weekAgo
       );
 
+      const todaySessionsCount = todaySessions.filter(
+        (s: Session) => s.session_type === "work"
+      ).length;
+      const todayMinutesCount = todaySessions.reduce(
+        (acc: number, s: Session) => acc + s.duration_minutes,
+        0
+      );
+      const weekSessionsCount = weekSessions.filter(
+        (s: Session) => s.session_type === "work"
+      ).length;
+      const totalSessionsCount = sessions.filter(
+        (s: Session) => s.session_type === "work"
+      ).length;
+
       setStats({
-        todaySessions: todaySessions.filter(
-          (s: Session) => s.session_type === "work"
-        ).length,
-        todayMinutes: todaySessions.reduce(
-          (acc: number, s: Session) => acc + s.duration_minutes,
-          0
-        ),
-        weekSessions: weekSessions.filter(
-          (s: Session) => s.session_type === "work"
-        ).length,
-        totalSessions: sessions.filter(
-          (s: Session) => s.session_type === "work"
-        ).length,
+        todaySessions: todaySessionsCount,
+        todayMinutes: todayMinutesCount,
+        weekSessions: weekSessionsCount,
+        totalSessions: totalSessionsCount,
       });
+
+      const avgSessionsPerDay = weekSessionsCount > 0 ? Math.round(weekSessionsCount / 7) : 0;
+      const todayBreaks = todaySessions.filter((s: Session) => s.session_type !== "work").length;
+
+      setOverviewStats([
+        {
+          icon: "🍅",
+          value: todaySessionsCount,
+          label: "Today's Focus",
+          subtext: `${todayMinutesCount} minutes`,
+        },
+        {
+          icon: "📈",
+          value: weekSessionsCount,
+          label: "This Week",
+          subtext: `${avgSessionsPerDay}/day avg`,
+        },
+        {
+          icon: "⏸️",
+          value: todayBreaks,
+          label: "Breaks Taken",
+          subtext: "Stay balanced!",
+        },
+        {
+          icon: "🎯",
+          value: totalSessionsCount,
+          label: "All Time",
+          subtext: "Total sessions",
+        },
+      ]);
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
@@ -242,6 +278,8 @@ const PomodoroTimer: React.FC = () => {
           Stay focused and boost your productivity
         </Subtitle>
       </Header>
+
+      <AppStats stats={overviewStats} />
 
       <Grid>
         <TimerCard theme={theme}>
