@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import MiniAppCard from "../components/MiniAppCard";
 import Banner from "../components/Banner";
+import UsageStatistics from "../components/UsageStatistics";
+import ActivityFeed from "../components/ActivityFeed";
 import { useApps, useTheme } from "@shared";
 
 const Container = styled.div`
@@ -215,6 +217,9 @@ const Dashboard: React.FC = () => {
           Explore powerful AI tools to boost your productivity
         </Subtitle>
       </Header>
+
+      <UsageStatistics />
+      <ActivityFeed />
 
       {categories.map((category, index) => (
         <CategorySection
